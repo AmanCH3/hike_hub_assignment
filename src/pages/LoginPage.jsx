@@ -11,7 +11,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className=" flex items-center justify-center ">
+    <div className=" flex items-center justify-evenly ">
       {/* Background Image */}
       <img 
         src={background} 
@@ -23,14 +23,14 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-black bg-opacity-40"></div>
       
       {/* Login Form Container */}
-      <div className=" w-full   bg-white bg-opacity-60 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden ">
+      <div className=" w-100   bg-white bg-opacity-60 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden  m-12 ">
         <div className="p-8 space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
             <p className="text-gray-600">Enter your credentials to access your account</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 ">
             <div>
               <label className=" text-gray-700 text-sm font-medium mb-1">Email</label>
               <input

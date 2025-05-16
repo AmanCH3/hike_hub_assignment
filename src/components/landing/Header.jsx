@@ -66,7 +66,7 @@ const Navbar = () => {
 
           {/* Sign In Button */}
           <Link
-            to="/signin"
+            to="/login"
             className="ml-3 px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition"
           >
             <div className="flex items-center space-x-1">
