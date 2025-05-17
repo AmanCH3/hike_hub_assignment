@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Navbar from './components/landing/Header'
 import HeroSection from './components/landing/HeroSection'
 import HikeFeatures from './components/landing/FeatureSection'
+import FeaturedTrails from './components/landing/FeatureTrails'
 
 function App() {
   
@@ -12,6 +13,7 @@ function App() {
       <Navbar/>
       <HeroSection/>
       <HikeFeatures/>
+      <FeaturedTrails/>
     </div>
   )
 }
