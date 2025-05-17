@@ -43,7 +43,7 @@ const Navbar = () => {
             <Link
               key={link.name}
               to={link.path}
-              className= 'flex items-center space-x-1 text-sm font-medium text-green-600 hover:text-gray-600 ' 
+              className= 'flex items-center space-x-1 text-sm font-medium text-gray-950 hover:text-green-500 ' 
                 // isActive(link.path)
                   // ? "text-green-600"
                   // : "text-gray-500 hover:text-gray-800"
