@@ -10,12 +10,8 @@ function App() {
   
 
   return (
-    <div className="min-h-screen w-full bg-white">
-      <Navbar/>
-      <HeroSection/>
-      <HikeFeatures/>
-      <FeaturedTrails/>
-      <Footer/>
+    <div>
+      
     </div>
   )
 }
