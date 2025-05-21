@@ -4,6 +4,7 @@ import LoginPage from '../pages/LoginPage'
 import App from '../App'
 import LandingPage from '../pages/LandingPage'
 import SignUpPage from '../pages/SignUpPage'
+import TrailsPage from '../pages/TrailsPage'
 // import MainLayout from '../layouts/MainLayout'
 // import LandingPage from '../pages/LandingPage'
 
@@ -15,6 +16,7 @@ export default function AppRouter() {
         {/* <Route path = "" element = {<App/> } ></Route>
          */}
          <Route path='' element = {<LandingPage/>}></Route>
+         <Route path = "/trails" element = {<TrailsPage/>}></Route>
          <Route path = "/signup" element = {<SignUpPage/>}></Route>
         <Route path='/login' element = {<LoginPage/>}>
 

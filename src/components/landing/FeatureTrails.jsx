@@ -41,7 +41,7 @@ const featuredTrails = [
 const FeaturedTrails = () => {
   return (
     <section className="py-12 px-4 bg-white">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-8xl mx-auto">
         <div className="flex justify-between items-center">
 
         <h2 className="text-3xl font-bold text-gray-900 mb-8">Featured Trails</h2>
