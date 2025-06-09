@@ -34,7 +34,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 text-xl font-bold text-gray-900">
           <Mountain className="text-green-600" size={24} />
-          <span>HikeHub</span>
+          <span className="font-">HikeHub</span>
         </Link>
 
         {/* Desktop Menu */}

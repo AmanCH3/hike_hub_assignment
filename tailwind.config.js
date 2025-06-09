@@ -1,3 +1,5 @@
+import { title } from 'process';
+
 /** @type {import('tailwindcss').Config} */
 export default {
     darkMode: ["class"],
@@ -7,6 +9,10 @@ export default {
   ],
   theme: {
   	extend: {
+		fontFamily : {
+			title : ["Lato"]
+
+		} ,
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
