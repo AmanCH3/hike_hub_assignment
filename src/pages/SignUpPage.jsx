@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import background from '../assets/login_page_web.png';
+import RegisterForm from '../components/auth/RegisterForm';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -32,74 +33,7 @@ export default function SignUpPage() {
           <p className="text-gray-600">Enter your credentials to create your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-gray-700 text-sm font-medium">Full name</label>
-            <input
-              type="text"
-              className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="text-gray-700 text-sm font-medium">Email</label>
-            <input
-              type="email"
-              className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="text-gray-700 text-sm font-medium">New Password</label>
-            <input
-              type="password"
-              className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="******"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="text-gray-700 text-sm font-medium">Confirm Password</label>
-            <input
-              type="password"
-              className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="******"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="text-gray-700 text-sm font-medium">Contact No</label>
-            <input
-              type="tel"
-              className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="+977-9800000000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
-          >
-            Create an Account
-          </button>
-        </form>
+        <RegisterForm/>
 
         {/* Divider */}
         <div className="flex items-center my-6">
