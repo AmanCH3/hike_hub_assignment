@@ -17,7 +17,7 @@ export default function AppRouter() {
          */}
          <Route path='' element = {<LandingPage/>}></Route>
          <Route path = "/trails" element = {<TrailsPage/>}></Route>
-         <Route path = "/signup" element = {<SignUpPage/>}></Route>
+         <Route path = "/register" element = {<SignUpPage/>}></Route>
         <Route path='/login' element = {<LoginPage/>}>
 
         </Route>
