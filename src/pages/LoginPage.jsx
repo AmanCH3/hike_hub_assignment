@@ -1,14 +1,23 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import background from '../assets/login_page_web.png';
+import LoginForm from '../components/auth/LoginForm';
+import { AuthContext } from '../auth/authProvider';
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const {user} = useContext(AuthContext)
+  let navigate = useNavigate()
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Login attempted with:', { email, password });
-  };
+  const eventChangePage = (event) => {
+    event.preventDefault() ;
+    navigate("/register")
+  }
+
+  if(user){
+    alert("User already logged in") ;
+   return
+  }
+
 
   return (
     <div className=" flex items-center justify-evenly ">
@@ -30,43 +39,7 @@ export default function LoginPage() {
             <p className="text-gray-600">Enter your credentials to access your account</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-4 ">
-            <div>
-              <label className=" text-gray-700 text-sm font-medium mb-1">Email</label>
-              <input
-                type="email"
-                className="w-full px-4 py-3  rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div>
-              <label className=" text-gray-700 text-sm font-medium mb-1">Password</label>
-              <input
-                type="password"
-                className="w-full px-4 py-3  rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
-                placeholder="******"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <div className="flex justify-end mt-2">
-                <a href="#" className="text-sm text-gray-600 hover:text-red-600">
-                  Forgot Password?
-                </a>
-              </div>
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
-            >
-              Sign In
-            </button>
-          </form>
+          <LoginForm/>
           
           <div className="flex items-center my-6">
             <div className="flex-grow border-t border-gray-300"></div>
@@ -77,6 +50,7 @@ export default function LoginPage() {
           <button
             type="button"
             className="w-full flex items-center justify-center gap-2 rounded-lg py-3 text-gray-700 hover:bg-gray-50"
+            onClick={eventChangePage}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -90,7 +64,7 @@ export default function LoginPage() {
           <div className="text-center pt-4">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="#" className="text-red-600 hover:text-red-700 font-medium">
+              <a href="/signup" className="text-red-600 hover:text-red-700 font-medium">
                 Sign up
               </a>
             </p>
