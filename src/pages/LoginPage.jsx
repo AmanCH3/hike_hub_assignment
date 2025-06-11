@@ -15,10 +15,9 @@ export default function LoginPage() {
 
   if(user){
     alert("User already logged in") ;
-    return 
+   return
   }
 
-  
 
   return (
     <div className=" flex items-center justify-evenly ">
@@ -65,7 +64,7 @@ export default function LoginPage() {
           <div className="text-center pt-4">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="/register" className="text-red-600 hover:text-red-700 font-medium">
+              <a href="/signup" className="text-red-600 hover:text-red-700 font-medium">
                 Sign up
               </a>
             </p>

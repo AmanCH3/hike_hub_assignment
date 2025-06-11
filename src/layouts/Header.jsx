@@ -1,132 +1,133 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Home,
-  Mountain,
-  Users,
-  ListChecks,
-  CreditCard,
-  User,
-  LogIn,
-  Sun,
-  Menu,
-  X,
-} from "lucide-react";
+  FaBars,
+  FaTimes,
+  FaHome,
+  FaHiking,
+  FaUsers,
+  FaCheckSquare,
+  FaCreditCard,
+  FaUser,
+  FaSignInAlt,
+} from "react-icons/fa";
 
-const navLinks = [
-  { name: "Home", path: "/", icon: <Home size={18} /> },
-  { name: "Trails", path: "/trails", icon: <Mountain size={18} /> },
-  { name: "Groups", path: "/groups", icon: <Users size={18} /> },
-  { name: "Checklist", path: "/checklist", icon: <ListChecks size={18} /> },
-  { name: "Payments", path: "/payments", icon: <CreditCard size={18} /> },
-  { name: "Profile", path: "/profile", icon: <User size={18} /> },
+const navItems = [
+  { name: "Home", path: "/", icon: <FaHome /> },
+  { name: "Trails", path: "/trails", icon: <FaHiking /> },
+  { name: "Groups", path: "/groups", icon: <FaUsers /> },
+  { name: "Checklist", path: "/checklist", icon: <FaCheckSquare /> },
+  { name: "Payments", path: "/payments", icon: <FaCreditCard /> },
+  { name: "Profile", path: "/profile", icon: <FaUser /> },
 ];
 
-const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
 
-  // const isActive = () => location.pathname === path;
+  useEffect(() => {
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50  w-full bg-gray-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex  flex-row  space-x-60 justify-between items-center">
+    <nav
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        isScrolled ? "bg-white shadow-md" : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2 text-xl font-bold text-gray-900">
-          <Mountain className="text-green-600" size={24} />
-          <span className="font-">HikeHub</span>
+        <Link to="/" className="text-2xl font-bold text-green-600">
+          HikeHub
         </Link>
 
-        {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center space-x-6" aria-label="Main Navigation">
-          {navLinks.map((link) => (
+        {/* Desktop Nav */}
+        <div className="hidden md:flex space-x-6 items-center">
+          {navItems.map((item) => (
             <Link
-              key={link.name}
-              to={link.path}
-              className= 'flex items-center space-x-1 text-sm font-medium text-gray-950 hover:text-green-500 ' 
-                // isActive(link.path)
-                  // ? "text-green-600"
-                  // : "text-gray-500 hover:text-gray-800"
-              // }`}
-              
-              
+              key={item.name}
+              to={item.path}
+              className={`flex items-center gap-1 text-sm font-medium transition ${
+                location.pathname === item.path
+                  ? "text-green-600"
+                  : "text-gray-600 hover:text-black"
+              }`}
             >
-              {link.icon}
-              <span>{link.name}</span>
+              {item.icon}
+              {item.name}
             </Link>
           ))}
+          {isLoggedIn ? (
+            <button
+              onClick={() => setIsLoggedIn(false)}
+              className="px-4 py-2 border border-black text-white rounded hover:bg-red-700 transition"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center px-5 py-2  bg-black text-white rounded-md hover:text-white hover:bg-red-700 transition border-spacing-6"
+            >
+              <FaSignInAlt className="mr-1" /> Sign In
+            </Link>
+          )}
+        </div>
 
-          {/* Theme Toggle */}
-          <button
-            className="p-2 rounded-md border border-gray-200 hover:bg-gray-100 transition"
-            aria-label="Toggle Theme"
-          >
-            <Sun size={18} />
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+            {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
-
-          {/* Sign In Button */}
-          <Link
-            to="/login"
-            className="ml-3 px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition"
-          >
-            <div className="flex items-center space-x-1">
-              <LogIn size={16} />
-              <span>Sign In</span>
-            </div>
-          </Link>
-        </nav>
-
-        {/* Mobile Menu Toggle */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden text-gray-700"
-          aria-label="Toggle Menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <nav className="md:hidden bg-gray-50 px-4 pb-4 pt-2 border-t border-gray-200">
-          <div className="space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive(link.path)
-                    ? "text-green-600 bg-green-50"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {link.icon}
-                <span>{link.name}</span>
-              </Link>
-            ))}
-
-            {/* Theme toggle and sign in in mobile */}
-            <div className="flex items-center justify-between mt-2">
-              <button
-                className="p-2 rounded-md border border-gray-200 hover:bg-gray-100"
-                aria-label="Toggle Theme"
-              >
-                <Sun size={18} />
-              </button>
-              <Link
-                to="/signin"
-                className="flex items-center space-x-1 px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition"
-              >
-                <LogIn size={16} />
-                <span>Sign In</span>
-              </Link>
-            </div>
-          </div>
-        </nav>
+      {isOpen && (
+        <div className="md:hidden bg-white px-4 pb-4 space-y-4 shadow-md">
+          {navItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-2 py-2 border-b ${
+                location.pathname === item.path
+                  ? "text-blue-600 font-semibold"
+                  : "text-gray-700"
+              }`}
+            >
+              {item.icon}
+              {item.name}
+            </Link>
+          ))}
+          {isLoggedIn ? (
+            <button
+              onClick={() => {
+                setIsLoggedIn(false);
+                setIsOpen(false);
+              }}
+              className="w-full py-2 mt-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-100 transition"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center py-2 mt-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              <FaSignInAlt className="mr-1" />
+              Sign In
+            </Link>
+          )}
+        </div>
       )}
-    </header>
+    </nav>
   );
-};
-
-export default Navbar;
+}
