@@ -1,7 +1,7 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import { AppSidebar } from '../../components/admin/app-sidebar' 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from '../../components/admin/app-sidebar'
 
 
 export default function AdminLayout() {

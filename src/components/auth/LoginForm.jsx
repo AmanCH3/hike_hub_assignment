@@ -14,7 +14,7 @@ export default function LoginForm() {
   useEffect(() => {
     if (isSuccess && data?.token) {
       localStorage.setItem("token", data.token);
-      navigate("/dashboard");
+      navigate("/admin/dashboard");
     }
   }, [isSuccess, data, navigate]);
 

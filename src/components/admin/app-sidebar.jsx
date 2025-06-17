@@ -25,11 +25,11 @@ const data = {
           icon: Home,
           isActive: true,
         },
-        {
-          title: "Analytics",
-          url: "/analytics",
-          icon: BarChart3,
-        },
+        // {
+        //   title: "Analytics",
+        //   url: "/analytics",
+        //   icon: BarChart3,
+        // },
       ],
     },
     {
@@ -37,22 +37,22 @@ const data = {
       items: [
         {
           title: "User Management",
-          url: "/users",
+          url: "/admin/users",
           icon: Users,
         },
         {
           title: "Trail Management",
-          url: "/trails",
+          url: "/admin/trail",
           icon: MapPin,
         },
         {
           title: "Group Hikes",
-          url: "/hikes",
+          url: "/admin/hikes",
           icon: Mountain,
         },
         {
           title: "Checklist Templates",
-          url: "/checklists",
+          url: "/admin/checklists",
           icon: CheckSquare,
         },
       ],
@@ -62,7 +62,7 @@ const data = {
       items: [
         {
           title: "Payments & Reports",
-          url: "/payments",
+          url: "/admin/payments",
           icon: CreditCard,
         },
       ],
@@ -72,7 +72,7 @@ const data = {
       items: [
         {
           title: "Settings",
-          url: "/settings",
+          url: "/admin/settings",
           icon: Settings,
         },
       ],
