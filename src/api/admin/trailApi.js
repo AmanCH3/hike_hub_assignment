@@ -12,13 +12,9 @@ export const createOneTrailApi = (trailData) =>
 export const getOneApiTrailApi = (id) => axios.get('/trail/' + id) 
 
 
-export const updateOneTrailApi = (id , data) => {
-    axios.put("/trail/" + id , data , {
-        headers : {
-            "Content-Type" : "multipart/form-data"
-        }
-    })
-}
+export const updateOneTrailApi = (id, data) => {
+  return axios.put("/trail/" + id, data);
+};
 
 export const deleteOneTrailApi = (id) => {
    return axios.delete("/trail/" + id)

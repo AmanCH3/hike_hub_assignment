@@ -17,9 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "react-toastify";
 
 export function EditTrailDialog({ open, onOpenChange, trail, onUpdate }) {
   const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (trail) {
@@ -34,7 +36,6 @@ export function EditTrailDialog({ open, onOpenChange, trail, onUpdate }) {
         duration_max: trail.duration?.max || "",
         features: Array.isArray(trail.features) ? trail.features.join(", ") : "",
         seasons: Array.isArray(trail.seasons) ? trail.seasons.join(", ") : "",
-        // images: trail.images || [], // Optional, for preview/editing
       });
     }
   }, [trail]);
@@ -48,8 +49,9 @@ export function EditTrailDialog({ open, onOpenChange, trail, onUpdate }) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const updatedData = {
       ...formData,
@@ -64,8 +66,17 @@ export function EditTrailDialog({ open, onOpenChange, trail, onUpdate }) {
     delete updatedData.duration_min;
     delete updatedData.duration_max;
 
-    onUpdate(trail._id, updatedData);
-  };
+    try {
+    await onUpdate(trail._id, updatedData);
+    toast.success("Trail updated successfully!"); 
+    onOpenChange(false);
+  } catch (err) {
+    console.error("Failed to update trail:", err);
+    toast.error("Update failed. Please try again."); 
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (!trail) return null;
 
@@ -157,7 +168,9 @@ export function EditTrailDialog({ open, onOpenChange, trail, onUpdate }) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Update Trail</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Updating..." : "Update Trail"}
+            </Button>
           </div>
         </form>
       </DialogContent>
