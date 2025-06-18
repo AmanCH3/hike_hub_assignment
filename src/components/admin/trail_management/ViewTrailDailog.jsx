@@ -20,19 +20,15 @@ const getDifficultyColor = (difficulty) => {
 export function ViewTrailDialog({ open, onOpenChange, trail }) {
   if (!trail) return null;
 
-  // --- Start of Corrected URL Logic ---
 
-  // 1. Define the server root URL, removing '/api' if it exists.
+
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const SERVER_ROOT_URL = API_BASE_URL ? API_BASE_URL.replace('/api', '') : 'http://localhost:5050';
+  const SERVER_ROOT_URL = API_BASE_URL ? API_BASE_URL.replace('/api', '') : 'http://localhost:5050/uploads';
 
-  // KEY FIX: This is the fully corrected, intelligent helper function.
   const getFullImageUrl = (path) => {
-    // If no path is provided, return the placeholder.
     if (!path) {
-      return "/placeholder.svg";
+      return "https://dk2dv4ezy246u.cloudfront.net/widgets/sMRhRDPDTxK7_large.jpg";
     }
-    // If the path is already a full URL, use it directly.
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }

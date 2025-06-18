@@ -15,7 +15,6 @@ export const createOneTrailService = async (data) => {
     try {
         const response = await createOneTrailApi(data) 
         return response.data
-
     }
     catch(err){
         throw err.response?.data || {message : "failed to create"}

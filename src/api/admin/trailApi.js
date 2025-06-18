@@ -6,7 +6,10 @@ export const getAllTrailApi = () => axios.get("trail/")
 
 export const createOneTrailApi = (trailData) => 
     axios.post("/trail/create/" , trailData, {
-})
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    },)
 
 
 export const getOneApiTrailApi = (id) => axios.get('/trail/' + id) 
