@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Link2 } from "lucide-react";
-import hike from "../../assets/hike_video.mp4"
+// import hike from "../../assets/hike_video.mp4"
+import hikeVideo from "../../assets/TrailVideo.mp4"
 
 
 const HeroSection = () => {
@@ -14,7 +15,7 @@ const HeroSection = () => {
         playsInline
         className="absolute w-full h-full object-cover z-0"
       >
-        <source src= {hike} type="video/mp4" />
+        <source src= {hikeVideo} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
