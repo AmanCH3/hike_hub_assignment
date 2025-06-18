@@ -26,7 +26,7 @@ export const AuthContextProvider = ({ children }) => {
         setLoading(true)
         const token = localStorage.getItem("token")
         const storedUser = localStorage.getItem("user")
-        console.log(token, storedUser)
+       
         if (token && storedUser) {
             setUser(JSON.parse(storedUser))
         } else {
