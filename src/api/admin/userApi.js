@@ -1,4 +1,4 @@
- import axios from "./api"
+ import axios from "../api"
 
 export const createUserApi = (data) => axios.post("/user/create" ,data) ;
 export const getUserApi = (data) => axios.get('/user/' ,data) ;

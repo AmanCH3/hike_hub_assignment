@@ -1,9 +1,10 @@
 import { data } from "autoprefixer";
 import { getAllTrailApi } from "../../api/admin/trailApi";
-import { getUserApi , updateUserApi , registerUserApi , deleteUserApi , getOneUserApi } from "../../api/admin/userApi";
+import { getUserApi , updateUserApi  , deleteUserApi , getOneUserApi } from "../../api/admin/userApi";
+import { registerUserApi } from "../../api/authApi";
 export const getAllUserService = async () => {
     try {
-        const response = await getAllTrailApi()
+        const response = await getUserApi()
         return response.data
 
     }
@@ -34,7 +35,7 @@ export const getOneUserService = async (id) => {
 
 export const updateOneUserSerivce  =  async (id , data) => {
     try {
-        const response = await updateOneUserSerivce(id, data) ;
+        const response = await updateUserApi(id, data) ;
         return response.data
 
     }
