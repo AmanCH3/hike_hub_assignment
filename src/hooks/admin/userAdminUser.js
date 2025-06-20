@@ -42,14 +42,13 @@ export const useUpdateUser = () => {
             mutationFn : ({id, data}) => updateOneUserSerivce(id, data) ,
             mutationKey : ["admin_user_update"],
             onSuccess : () => {
+                toast.success("Updated Successfully")
                 queryClient.invalidateQueries (
                     [
 
                         "admin_user" , "admin_user_detail"
                     ]
-                    
                 )
-                toast.success("Updated Successfully")
             },
             onError : (err) => {
                 toast.error(err.message || "Failed to Updated")

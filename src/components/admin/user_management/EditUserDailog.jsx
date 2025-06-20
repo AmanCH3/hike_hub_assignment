@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+
+// Import your UI components
 import {
   Dialog,
   DialogContent,
@@ -18,37 +22,27 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-// 1. Accept props by destructuring them in the function signature
+// 1. Define the validation schema outside the component
+const editUserSchema = Yup.object().shape({
+  name: Yup.string().min(2, 'Too Short!').required('Full Name is required'),
+  email: Yup.string().email('Invalid email address').required('Email is required'),
+  role: Yup.string().oneOf(['User', 'Guide']) ,
+  status: Yup.string().oneOf(['Active', 'Suspended'], 'Invalid Status').required('Status is required'),
+  phone: Yup.string().optional(),
+  address: Yup.string().optional(),
+});
+
+
 export function EditUserDailog({ open, onOpenChange, user, onUpdate }) {
-  // 2. Manage the form's data with its own state
-  const [formData, setFormData] = useState({});
-
-  // 3. Use useEffect to update the form state whenever the selected user changes
-  useEffect(() => {
-    // If a user is passed, set the form data. Otherwise, reset it.
+  
+  const handleUpdateSubmit = (values, { setSubmitting }) => {
     if (user) {
-      setFormData({
-        name: user.name || '',
-        email: user.email || '',
-        role: user.role || 'user',
-        status: user.status || 'Active',
-        phone: user.phone || '',
-        address: user.address || '',
-        emergencyContact: user.emergencyContact || '',
-        medicalInfo: user.medicalInfo || '',
-      });
+      onUpdate(user._id, values);
     }
-  }, [user]); // This effect runs when the 'user' prop changes
-
-  const handleUpdateClick = () => {
-    // Call the onUpdate function passed from the parent
-    if (user) {
-      onUpdate(user._id, formData);
-    }
-    onOpenChange(false); // Close the dialog
+    setSubmitting(false);
+    onOpenChange(false);
   };
 
-  // The Dialog component uses the `open` and `onOpenChange` props directly
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -56,102 +50,124 @@ export function EditUserDailog({ open, onOpenChange, user, onUpdate }) {
           <DialogTitle>Edit User: {user?.name}</DialogTitle>
           <DialogDescription>Update user information and settings</DialogDescription>
         </DialogHeader>
-        {/* The rest of your form JSX is mostly correct */}
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="edit-name">Full Name *</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-email">Email Address *</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="edit-role">Role</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Hiker">User</SelectItem>
-                  <SelectItem value="Guide">Guide</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="edit-status">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Suspended">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        {/* 2. Use the Formik component to wrap your form */}
+        <Formik
+          // 3. Set initial values from the 'user' prop
+          initialValues={{
+            name: user?.name || '',
+            email: user?.email || '',
+            role: user?.role || 'User',
+            status: user?.status || 'Active',
+            phone: user?.phone || '',
+            address: user?.address || '',
+          }}
+          validationSchema={editUserSchema}
+          onSubmit={handleUpdateSubmit}
+          // 4. Important: This re-initializes the form when the user prop changes
+          enableReinitialize={true} 
+        >
+          {/* 5. Use Formik's render props to get form state and handlers */}
+          {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isSubmitting }) => (
+            <Form className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-name">Full Name *</Label>
+                  <Input
+                    id="edit-name"
+                    name="name"
+                    value={values.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                  {/* 6. Display validation errors */}
+                  <ErrorMessage name="name" component="div" className="text-destructive text-sm mt-1" />
+                </div>
+                <div>
+                  <Label htmlFor="edit-email">Email Address *</Label>
+                  <Input
+                    id="edit-email"
+                    name="email"
+                    type="email"
+                    value={values.email}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                  <ErrorMessage name="email" component="div" className="text-destructive text-sm mt-1" />
+                </div>
+              </div>
 
-          <div>
-            <Label htmlFor="edit-phone">Phone Number</Label>
-            <Input
-              id="edit-phone"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            />
-          </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-role">Role</Label>
+                  {/* 7. Handle custom components like Select */}
+                  <Select
+                    value={values.role}
+                    onValueChange={(value) => setFieldValue('role', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="User">User</SelectItem>
+                      <SelectItem value="Guide">Guide</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <ErrorMessage name="role" component="div" className="text-destructive text-sm mt-1" />
+                </div>
+                <div>
+                  <Label htmlFor="edit-status">Status</Label>
+                  <Select
+                    value={values.status}
+                    onValueChange={(value) => setFieldValue('status', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Suspended">Suspended</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <ErrorMessage name="status" component="div" className="text-destructive text-sm mt-1" />
+                </div>
+              </div>
 
-          <div>
-            <Label htmlFor="edit-address">Address</Label>
-            <Textarea
-              id="edit-address"
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              rows={2}
-            />
-          </div>
+              <div>
+                <Label htmlFor="edit-phone">Phone Number</Label>
+                <Input
+                  id="edit-phone"
+                  name="phone"
+                  value={values.phone}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                />
+              </div>
 
-          <div>
-            <Label htmlFor="edit-emergency">Emergency Contact</Label>
-            <Input
-              id="edit-emergency"
-              value={formData.emergencyContact}
-              onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
-            />
-          </div>
+              <div>
+                <Label htmlFor="edit-address">Address</Label>
+                <Textarea
+                  id="edit-address"
+                  name="address"
+                  value={values.address}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  rows={2}
+                />
+              </div>
 
-          <div>
-            <Label htmlFor="edit-medical">Medical Information</Label>
-            <Textarea
-              id="edit-medical"
-              value={formData.medicalInfo}
-              onChange={(e) => setFormData({ ...formData, medicalInfo: e.target.value })}
-              rows={3}
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateClick}>
-              Update User
-            </Button>
-          </div>
-        </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                {/* 8. Use type="submit" and disable the button during submission */}
+                <Button type="submit" disabled={isSubmitting}>
+                  Update User
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
       </DialogContent>
     </Dialog>
   );

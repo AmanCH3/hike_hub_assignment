@@ -37,7 +37,6 @@ export const updateOneUserSerivce  =  async (id , data) => {
     try {
         const response = await updateUserApi(id, data) ;
         return response.data
-
     }
     catch (err){
         throw err.response?.data || {message : "Failed to update user"}
