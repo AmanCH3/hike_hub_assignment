@@ -275,8 +275,10 @@ function GroupCard({ group, isPast = false }) {
       </CardContent>
 
       <CardFooter className="pt-0">
-        <Button className="w-full" asChild>
-          <Link href={`/groups/${group.id}`}>{isPast ? "View Details" : "Join Group"}</Link>
+        <Button className="w-full bg-green-600 hover:bg-red-500 text-white" >
+          {/* <Link href={`/groups/${group.id}`}>{isPast ? "View Details" : "Join Group"}</Link> */}
+          Join Group
+        
         </Button>
       </CardFooter>
     </Card>

@@ -18,12 +18,12 @@ export default function GroupsPage() {
             <h1 className="text-3xl font-bold tracking-tight">Hiking Groups</h1>
             <p className="text-muted-foreground">Join existing hiking groups or create your own</p>
           </div>
-          <Button asChild>
-            <Link href="/groups/create">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Group
-            </Link>
+          <Button className="w-40 bg-green-600 hover:bg-red-500 text-white p-2 rounded flex justify-center items-center cursor-pointer">
+          <Plus className="mr-2 h-4 w-4" />
+           Create Group
           </Button>
+
+
         </div>
 
         <GroupsList />
