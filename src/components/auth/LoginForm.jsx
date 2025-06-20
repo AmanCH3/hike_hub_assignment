@@ -1,17 +1,26 @@
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 import useLoginUser from "../../hooks/useLoginUser";
-import { useState } from "react";
-import { FiEye, FiEyeOff } from "react-icons/fi"; 
+import { useState, useEffect } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { useNavigate } from "react-router-dom"; // ✅ Import this
 
 export default function LoginForm() {
-  const { mutate, data, error, isPending } = useLoginUser();
+  const navigate = useNavigate(); // ✅ Hook to navigate programmatically
+  const { mutate, data, error, isSuccess , isPending } = useLoginUser();
   const [showPassword, setShowPassword] = useState(false);
 
-  // validation using yup
+  // ✅ Redirect on success
+  useEffect(() => {
+    if (isSuccess && data?.token) {
+      localStorage.setItem("token", data.token);
+      navigate("/admin/dashboard");
+    }
+  }, [isSuccess, data, navigate]);
+
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email").required("Email required"),
-    password: Yup.string().min(8, "Min 8 character required").required("Password required"),
+    password: Yup.string().min(8, "Min 8 characters required").required("Password required"),
   });
 
   const formik = useFormik({
@@ -19,9 +28,9 @@ export default function LoginForm() {
       email: "",
       password: "",
     },
-    validationSchema: validationSchema,
-    onSubmit: (data) => {
-      mutate(data);
+    validationSchema,
+    onSubmit: (values) => {
+      mutate(values); 
     },
   });
 
@@ -44,7 +53,6 @@ export default function LoginForm() {
         )}
       </div>
 
-      {/* ✅ Password Field with Eye Icon */}
       <div className="relative">
         <input
           type={showPassword ? "text" : "password"}
@@ -65,18 +73,22 @@ export default function LoginForm() {
           <p className="text-red-900 text-sm mt-1">{formik.errors.password}</p>
         )}
       </div>
+
       <div className="flex justify-end mt-2">
-                <a href="/forgotpassword" className="text-sm text-gray-600 hover:text-red-600">
-                  Forgot Password?
-                </a>
-       </div>
+        <a href="/forgotpassword" className="text-sm text-gray-600 hover:text-red-600">
+          Forgot Password?
+        </a>
+      </div>
 
       <button
         type="submit"
+        disabled={isPending}
         className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
       >
-        Sign In
+        {isPending ? "Signing In..." : "Sign In"}
       </button>
+
+      {error && <p className="text-red-600 mt-2 text-sm">Login failed. Please check your credentials.</p>}
     </form>
   );
 }

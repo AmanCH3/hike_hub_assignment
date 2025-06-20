@@ -8,7 +8,7 @@ export default function MainLayout() {
     <>
       <Navbar />
       <main className="pt-16">
-        <Outlet />
+      <Outlet />
       </main>
     </>
   )

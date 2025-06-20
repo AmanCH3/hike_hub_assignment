@@ -11,6 +11,7 @@ import {
   FaUser,
   FaSignInAlt,
 } from "react-icons/fa";
+import logo from "../assets/hike_logo.png"
 
 const navItems = [
   { name: "Home", path: "/", icon: <FaHome /> },
@@ -41,10 +42,10 @@ export default function Navbar() {
         isScrolled ? "bg-white shadow-md" : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto flex justify-between items-center py-4 px-4">
+      <div className="max-w-7xl mx-auto flex justify-between items-center py-2 px-4 ">
         {/* Logo */}
-        <Link to="/" className="text-2xl font-bold text-green-600">
-          HikeHub
+        <Link to="/" className="">
+          <img className="h-[40px] w-[40px]" src={logo} alt="Hike Hub" />
         </Link>
 
         {/* Desktop Nav */}
