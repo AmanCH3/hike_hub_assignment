@@ -4,6 +4,7 @@ import "./index.css";
 import AppRouter from "./routers/AppRouter.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastContainer } from "react-toastify";
+
 import { AuthContextProvider } from "./auth/authProvider.jsx";
 
 

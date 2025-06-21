@@ -9,9 +9,11 @@ export const AuthContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(true)
 
     const login = (userData, token) => {
+
         setLoading(true)
         localStorage.setItem("user", JSON.stringify(userData))
         localStorage.setItem("token", token)
+        localStorage.setItem('role' , userData.role)
         setUser(userData)
         setLoading(false)
     }
@@ -26,6 +28,7 @@ export const AuthContextProvider = ({ children }) => {
         setLoading(true)
         const token = localStorage.getItem("token")
         const storedUser = localStorage.getItem("user")
+    
        
         if (token && storedUser) {
             setUser(JSON.parse(storedUser))

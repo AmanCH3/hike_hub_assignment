@@ -13,9 +13,9 @@
     SidebarMenuItem,
     SidebarRail,
   } from "@/components/ui/sidebar"
-  import { useAuth } from "../../auth/authProvider";
   import { useState } from "react";
   import { LogoutModal } from "./logout-modal";
+import { useAuth } from "../../auth/authProvider";
 
   const data = {
     navMain: [
