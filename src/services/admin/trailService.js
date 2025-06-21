@@ -6,7 +6,7 @@ export const getAllTrailService = async () => {
         return response.data
     }
     catch(err){
-        throw err.response?.data || {messasge : "Failed to fetch"}
+        throw err.response?.data || {messasge : "Failed to fetch Trail"}
     }
 
 }

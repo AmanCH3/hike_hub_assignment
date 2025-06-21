@@ -1,22 +1,28 @@
 import { useFormik } from "formik";
 import * as Yup from 'yup';
-import useLoginUser from "../../hooks/useLoginUser";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { useNavigate } from "react-router-dom"; // ✅ Import this
+import useLoginUser from "../../hooks/useLoginUser";
+import { useNavigate } from "react-router-dom";
+
 
 export default function LoginForm() {
-  const navigate = useNavigate(); // ✅ Hook to navigate programmatically
-  const { mutate, data, error, isSuccess , isPending } = useLoginUser();
+  const navigate = useNavigate();
+  const { mutate, isPending, error , isSuccess , data } = useLoginUser();
   const [showPassword, setShowPassword] = useState(false);
+  
 
-  // ✅ Redirect on success
-  useEffect(() => {
-    if (isSuccess && data?.token) {
-      localStorage.setItem("token", data.token);
-      navigate("/admin/dashboard");
-    }
-  }, [isSuccess, data, navigate]);
+
+useEffect(() => {
+  
+  if (isSuccess && data?.token && data?.user?.role === "admin") {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.user.role);
+    navigate("/admin/dashboard");
+  } else if (isSuccess && data?.token) {
+    navigate("/");
+  }
+}, [isSuccess, data, navigate]);
 
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email").required("Email required"),
@@ -43,10 +49,7 @@ export default function LoginForm() {
           type="email"
           className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
           placeholder="name@example.com"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.email}
-          required
+          {...formik.getFieldProps('email')}
         />
         {formik.touched.email && formik.errors.email && (
           <p className="text-red-900 text-sm mt-1">{formik.errors.email}</p>
@@ -54,14 +57,13 @@ export default function LoginForm() {
       </div>
 
       <div className="relative">
+        <label className="text-gray-700 text-sm font-medium mb-1">Password</label>
         <input
           type={showPassword ? "text" : "password"}
           name="password"
           placeholder="Password"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.password}
           className="w-full pl-4 pr-10 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-red-600"
+          {...formik.getFieldProps('password')}
         />
         <div
           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
@@ -88,7 +90,11 @@ export default function LoginForm() {
         {isPending ? "Signing In..." : "Sign In"}
       </button>
 
-      {error && <p className="text-red-600 mt-2 text-sm">Login failed. Please check your credentials.</p>}
+      {error && (
+        <p className="text-red-600 mt-2 text-sm">
+          {error.response?.data?.message || "Login failed. Please check your credentials."}
+        </p>
+      )}
     </form>
   );
 }

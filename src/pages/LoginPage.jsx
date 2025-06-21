@@ -1,19 +1,25 @@
-import { useContext, useState } from 'react';
+import { useContext, useState , useEf, useEffect } from 'react';
 import background from '../assets/login_page_web.png';
 import LoginForm from '../components/auth/LoginForm';
-import { AuthContext } from '../auth/authProvider';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/authProvider';
+
 
 export default function LoginPage() {
-  const {user} = useContext(AuthContext)
-  let navigate = useNavigate()
+  const { user } = useAuth(); 
+  const navigate = useNavigate();
 
- 
-
-  // if(user){
-  //   alert("User already logged in") ;
-  //  return
-  // }
+  
+  useEffect(() => {
+    if (user) {
+    
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [user, navigate]);
 
 
   return (
