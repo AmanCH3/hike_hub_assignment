@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { GroupsList } from "../components/grouplist"
 import { Link } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { GroupChat } from "../components/admin/group_management/group_chat"
+import { GroupDetails } from "../components/admin/group_management/group_detail"
 
 export const metadata = {
   title: "Hiking Groups - HikeHub",
@@ -11,22 +14,21 @@ export const metadata = {
 
 export default function GroupsPage() {
   return (
-    <main className="container mx-auto pt-5 pb-13 p-20">
-      <div className="flex flex-col gap-6">
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">Hiking Groups</h1>
-            <p className="text-muted-foreground">Join existing hiking groups or create your own</p>
-          </div>
-          <Button className="w-40 bg-green-600 hover:bg-red-500 text-white p-2 rounded flex justify-center items-center cursor-pointer">
-          <Plus className="mr-2 h-4 w-4" />
-           Create Group
-          </Button>
+   <main className="container mx-auto pt-24 pb-16">
+      <div className="max-w-6xl mx-auto">
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="details">Group Details</TabsTrigger>
+            <TabsTrigger value="chat">Group Chat</TabsTrigger>
+          </TabsList>
+          <TabsContent value="details">
+            <GroupDetails groupId={params.id} />
+          </TabsContent>
 
-
-        </div>
-
-        <GroupsList />
+          <TabsContent value="chat">
+            <GroupChat groupId={params.id} />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   )
