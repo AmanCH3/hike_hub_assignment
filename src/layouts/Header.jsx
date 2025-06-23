@@ -11,7 +11,7 @@ import {
   FaUser,
   FaSignInAlt,
 } from "react-icons/fa";
-import logo from "../assets/hike_logo.png"
+import logo from "../assets/Trail_Mate_Logo.png"
 
 const navItems = [
   { name: "Home", path: "/", icon: <FaHome /> },
