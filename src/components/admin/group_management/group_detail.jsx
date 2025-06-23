@@ -120,8 +120,7 @@ const mockGroup = {
 }
 
 
-
-export function GroupDetails({params : groupId }) {
+export function GroupDetails({ groupId }) {
   const [isJoined, setIsJoined] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [currentUser] = useState({ id: 999, name: "Current User" }) // Mock current user

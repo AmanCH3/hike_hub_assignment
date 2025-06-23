@@ -24,3 +24,14 @@ export const joinOneGroupApi = (id) => {
     return axios.post('/group/' + id + '/join')
 }
 
+export const requestToJoinGroupApi = (id, data) => {
+    return axios.post(`/group/${id}/request-join`, data);
+};
+
+export const approveJoinRequestApi = (groupId, requestId) => {
+    return axios.post(`/group/${groupId}/requests/${requestId}/approve`);
+};
+
+export const denyJoinRequestApi = (groupId, requestId) => {
+    return axios.post(`/group/${groupId}/requests/${requestId}/deny`);
+};
