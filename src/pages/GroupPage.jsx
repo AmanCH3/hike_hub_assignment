@@ -1,8 +1,8 @@
 // src/pages/GroupsPage.jsx
 import { useState } from "react";
 import { useGroup } from "../hooks/useGroup";
-import { GroupCard } from "../components/admin/group_management/group_card";
-import { GroupDetails } from "../components/admin/group_management/group_detail";
+import { GroupCard } from "../components/user_group_management/group_card";
+import { GroupDetails } from "../components/user_group_management/group_detail";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 // A mock user object for demonstration. 

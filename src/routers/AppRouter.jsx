@@ -16,7 +16,7 @@ import AdminLayout from "../layouts/admin/AdminLayout";
 import GroupsPage from "../pages/GroupPage";
 import ProtectedRoute from "../components/protectedRoutes";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { GroupDetails } from "../components/admin/group_management/group_detail";
+import { GroupDetails } from "../components/user_group_management/group_detail";
 
 export default function AppRouter() {
   return (
