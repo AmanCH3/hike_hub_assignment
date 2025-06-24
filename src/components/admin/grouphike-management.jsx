@@ -4,10 +4,8 @@
 import React, { useState } from "react" // Removed useEffect as its logic moved to GroupEditDialog
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Calendar, Users } from "lucide-react" // Keep icons used in summary cards
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-
-// Import actual hooks from your useGroup.jsx
+import { Calendar, Plus, Users } from "lucide-react" // Keep icons used in summary cards
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle  , DialogTrigger} from "@/components/ui/dialog"
 import {
   useGroup,
   useCreateGroup,
@@ -15,18 +13,16 @@ import {
   useDeleteOneGroup,
   useGetOneGroup,
 } from "../../hooks/useGroup"
-
-// Import the modular dialog components
-import { GroupCreateDialog } from "./admin_group_management/GrouoDailogCreate"
+import { CreateGroupFormAdmin } from "./admin_group_management/GroupDailogCreate"
 import { GroupEditDialog } from "./admin_group_management/GroupDailogEdit"
 import { GroupDeleteAlertDialog } from "./admin_group_management/GroupDailogDelete"
 import { GroupTable } from "./admin_group_management/GroupTable"
-
-// Import GroupDetails (ensure its path is correct)
 import { GroupDetails } from "../../components/user_group_management/group_detail"
-
+import { useAdminUser } from "../../hooks/admin/userAdminUser"
+import { useAuth } from "../../auth/authProvider"
 
 export function GroupHikeManagement() {
+  const {user , isAuthenticated} = useAuth() ;
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [difficultyFilter, setDifficultyFilter] = useState("all")
@@ -41,7 +37,7 @@ export function GroupHikeManagement() {
     trail: "",
     date: "",
     maxSize: 10,
-    guide: "",
+    leader: "",
     difficulty: "Easy",
     description: "",
     requirements: "",
@@ -58,13 +54,12 @@ export function GroupHikeManagement() {
 
    const groups = groupsData?.data || [];
   const pagination = groupsData?.pagination;
-
   const createGroupMutation = useCreateGroup()
   const updateGroupMutation = useUpdateOneGroup()
   const deleteGroupMutation = useDeleteOneGroup()
   const { group: selectedHikeDetails } = useGetOneGroup(selectedHikeId)
 
-  const adminUser = { _id: "replace_with_actual_admin_id", role: "admin" }
+ 
 
 
 
@@ -75,7 +70,7 @@ export function GroupHikeManagement() {
       date: formData.date,
       description: formData.description,
       maxSize: formData.maxSize,
-      leader: formData.guide,
+      leader: formData.leader,
       status: "upcoming",
       meetingPoint: { description: formData.meetingPoint },
       requirements: formData.requirements ? [formData.requirements] : [],
@@ -86,7 +81,7 @@ export function GroupHikeManagement() {
       onSuccess: () => {
         setIsCreateDialogOpen(false)
         setFormData({
-          title: "", trail: "", date: "", maxSize: 10, guide: "", difficulty: "Easy", description: "", requirements: "", meetingPoint: "",
+          title: "", trail: "", date: "", maxSize: 10, leader: "", difficulty: "Easy", description: "", requirements: "", meetingPoint: "",
         })
       },
     })
@@ -100,7 +95,7 @@ export function GroupHikeManagement() {
       date: formData.date,
       description: formData.description,
       maxSize: formData.maxSize,
-      leader: formData.guide,
+      leader: formData.leader,
       meetingPoint: { description: formData.meetingPoint },
       requirements: formData.requirements ? [formData.requirements] : [],
       difficulty: formData.difficulty,
@@ -129,14 +124,20 @@ export function GroupHikeManagement() {
           <p className="text-muted-foreground">Schedule and manage group hiking events</p>
         </div>
 
-        <GroupCreateDialog
-          isOpen={isCreateDialogOpen}
-          onOpenChange={setIsCreateDialogOpen}
-          formData={formData}
-          setFormData={setFormData}
-          handleCreateHike={handleCreateHike}
-          isCreating={createGroupMutation.isPending}
-        />
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Group
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+            {/* The CreateGroupForm is now rendered inside the dialog content */}
+            <CreateGroupFormAdmin user = {user}
+              onSuccess={() => setIsCreateDialogOpen(false)} 
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Summary Cards */}
@@ -206,7 +207,7 @@ export function GroupHikeManagement() {
             <DialogDescription>Complete information about the selected hike</DialogDescription>
           </DialogHeader>
           {selectedHikeDetails ? (
-            <GroupDetails group={selectedHikeDetails} user={adminUser} />
+            <GroupDetails group={selectedHikeDetails} />
           ) : (
             selectedHikeId && <p>Loading details...</p>
           )}

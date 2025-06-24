@@ -12,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, MoreHorizontal, Users, MapPin, Eye, Edit, Trash2 } from "lucide-react"
 
-// --- Utility Functions (Keep consistent with GroupHikeManagement) ---
+
 const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
         case 'easy': return 'bg-green-100 text-green-800 hover:bg-green-100';
@@ -35,7 +35,6 @@ const getStatusColor = (status) => {
 
 
 export function GroupTable({
-
   groups,
   isLoading,
   error,
@@ -51,16 +50,10 @@ export function GroupTable({
   setIsViewDialogOpen,
   setIsEditDialogOpen,
   setIsDeleteDialogOpen,
-}) {
+})
 
+{
 
-  // const groups = groups.filter((group) => {
-  //   const matchesStatus = statusFilter === "all" || group.status?.toLowerCase() === statusFilter
-  //   const matchesDifficulty = difficultyFilter === "all" || group.difficulty?.toLowerCase() === difficultyFilter
-  //   return matchesStatus && matchesDifficulty
-  // }
-
-// )
 
   return (
     <>
@@ -145,17 +138,29 @@ export function GroupTable({
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        {/* <TableCell>
                           <div className="flex items-center space-x-2">
                             <Avatar className="h-6 w-6">
-                              <AvatarImage src={group.leader?.profileImage || "/placeholder.svg"} alt={group.leader?.name} />
+                              <AvatarImage src={group.leader.name?.profileImage || "/placeholder.svg"} alt={group.participants?.name} />
                               <AvatarFallback>
                                 {group.leader?.name?.split(" ").map((n) => n[0]).join("") || "L"}
                               </AvatarFallback>
                             </Avatar>
                             <span className="text-sm">{group.leader?.name || "N/A"}</span>
                           </div>
-                        </TableCell>
+                        </TableCell> */}
+                        <TableCell>
+  <div className="flex items-center space-x-2">
+    <Avatar className="h-6 w-6">
+      {/* This will now work correctly with the fixed controller */}
+      <AvatarImage src={group.leader?.profileImage} alt={group.leader?.name} />
+      <AvatarFallback>
+        {group.leader?.name?.split(" ").map((n) => n[0]).join("") || "L"}
+      </AvatarFallback>
+    </Avatar>
+    <span className="text-sm">{group.leader?.name || "N/A"}</span>
+  </div>
+</TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium">{new Date(group.date).toLocaleDateString()}</div>

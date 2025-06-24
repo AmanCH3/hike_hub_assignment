@@ -29,12 +29,14 @@ const formatDuration = (duration) => {
   return `${duration} hours`;
 };
 
-export function GroupCard({ group, onView }) {
+export function GroupCard({ group, onView  }) {
   const navigate = useNavigate();
   // Ensure spotsFilled counts only confirmed participants if that's the intent
   // Otherwise, group.participants?.length counts all participants (pending, confirmed, declined)
   const spotsFilled = group.participants?.filter(p => p.status === 'confirmed').length || 0; 
   const spotsTotal = group.maxSize || 0;
+
+
 
   // This handler now prioritizes the onView function if it exists.
   const handleViewDetailsClick = (e) => {

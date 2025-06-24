@@ -28,7 +28,7 @@ export function JoinGroupDialog({ open, setOpen, groupTitle, onJoin }) {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid w-full gap-1.5">
+          {/* <div className="grid w-full gap-1.5">
             <Label htmlFor="message">Your Message (Optional)</Label>
             <Textarea
               placeholder="Tell the admin why you'd like to join..."
@@ -36,7 +36,7 @@ export function JoinGroupDialog({ open, setOpen, groupTitle, onJoin }) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
-          </div>
+          </div> */}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>

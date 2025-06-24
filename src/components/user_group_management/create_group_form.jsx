@@ -29,10 +29,11 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, MapPin, Clock, Mountain, Plus, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useCreateGroup } from "../../../hooks/useGroup"; // Import the hook
-import { useAdminTrail } from "../../../hooks/admin/useAdminTrail"; // To get real trails
+import { useCreateGroup } from "../../hooks/useGroup"; 
+import { useAdminTrail } from "../../hooks/admin/useAdminTrail"; 
+import { toast } from "react-toastify";
 
-export function CreateGroupForm() {
+export function CreateGroupForm({ user, onSuccess }) {
   const navigate = useNavigate();
   const { mutate: createGroup, isPending: isLoading } = useCreateGroup();
   const { trails: availableTrails } = useAdminTrail();
@@ -69,24 +70,27 @@ export function CreateGroupForm() {
   };
 
   const addRequirement = () => {
-    if (
-      newRequirement.trim() &&
-      !requirements.includes(newRequirement.trim())
-    ) {
-      setRequirements([...requirements, newRequirement.trim()]);
+    const trimmed = newRequirement.trim();
+    if (trimmed && !requirements.includes(trimmed)) {
+      setRequirements([...requirements, trimmed]);
       setNewRequirement("");
     }
   };
 
-  const removeRequirement = (requirement) => {
-    setRequirements(requirements.filter((r) => r !== requirement));
+  const removeRequirement = (req) => {
+    setRequirements(requirements.filter((r) => r !== req));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!user) {
+      toast.error("User must be logged in");
+      return;
+    }
+
     if (!selectedTrail || !date) {
-      alert("Please select a trail and date");
+      toast.error("Please select a trail and date");
       return;
     }
 
@@ -104,28 +108,109 @@ export function CreateGroupForm() {
 
     createGroup(submissionData, {
       onSuccess: () => {
+        toast.success("Group created successfully!");
+        onSuccess?.(); 
         navigate("/groups");
+      },
+      onError: (error) => {
+        toast.error("Failed to create group");
+        console.error(error);
       },
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* ... The rest of the form JSX remains largely the same ... */}
-      {/* Make sure to replace mock `availableTrails` with the fetched one */}
-      <Select onValueChange={handleTrailSelect}>
-        <SelectTrigger>
-          <SelectValue placeholder="Choose a trail" />
-        </SelectTrigger>
-        <SelectContent>
-          {availableTrails.map((trail) => (
-            <SelectItem key={trail._id} value={trail._id.toString()}>
-              {trail.name} - {trail.location}
-            </SelectItem>
+      <div>
+        <Label>Title</Label>
+        <Input name="title" value={formData.title} onChange={handleInputChange} />
+      </div>
+
+      <div>
+        <Label>Description</Label>
+        <Textarea name="description" value={formData.description} onChange={handleInputChange} />
+      </div>
+
+      <div>
+        <Label>Meeting Point</Label>
+        <Input name="meetingPoint" value={formData.meetingPoint} onChange={handleInputChange} />
+      </div>
+
+      <div>
+        <Label>Max Group Size</Label>
+        <Input
+          name="maxSize"
+          type="number"
+          value={formData.maxSize}
+          onChange={handleInputChange}
+          min={1}
+        />
+      </div>
+
+      <div>
+        <Label>Trail</Label>
+        <Select onValueChange={handleTrailSelect}>
+          <SelectTrigger>
+            <SelectValue placeholder="Choose a trail" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableTrails.map((trail) => (
+              <SelectItem key={trail._id} value={trail._id}>
+                {trail.name} - {trail.location}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Date</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("w-full justify-start", !date && "text-muted-foreground")}>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date ? format(date, "PPP") : "Pick a date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar mode="single" selected={date} onSelect={setDate} />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <div>
+        <Label>Image</Label>
+        <Input type="file" accept="image/*" onChange={handleImageChange} />
+      </div>
+
+      <div>
+        <Label>Requirements</Label>
+        <div className="flex gap-2">
+          <Input
+            value={newRequirement}
+            onChange={(e) => setNewRequirement(e.target.value)}
+            placeholder="Add a requirement"
+          />
+          <Button type="button" onClick={addRequirement}>
+            Add
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {requirements.map((req) => (
+            <span
+              key={req}
+              className="bg-gray-200 px-2 py-1 rounded flex items-center"
+            >
+              {req}
+              <X
+                className="ml-1 cursor-pointer w-4 h-4 text-red-500"
+                onClick={() => removeRequirement(req)}
+              />
+            </span>
           ))}
-        </SelectContent>
-      </Select>
-      {/* ... other form fields ... */}
+        </div>
+      </div>
+
       <div className="flex gap-4">
         <Button
           type="button"
@@ -136,7 +221,7 @@ export function CreateGroupForm() {
           Cancel
         </Button>
         <Button type="submit" className="flex-1" disabled={isLoading}>
-          {isLoading ? "Creating Group..." : "Create Group"}
+          {isLoading ? "Creating..." : "Create Group"}
         </Button>
       </div>
     </form>

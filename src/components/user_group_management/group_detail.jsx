@@ -95,14 +95,13 @@ export function GroupDetails({ group, user }) {
   
   // Identify current user's role and request status
   const isCurrentUserLeader = leader?._id === user?._id;
-  const currentUserParticipantEntry = participants.find(p => p.user?._id === user?._id); // Find any entry for current user
+  const currentUserParticipantEntry = participants.find(p => p.user?._id === user?._id); 
   const isCurrentUserConfirmedParticipant = currentUserParticipantEntry?.status === 'confirmed';
   const hasPendingRequest = currentUserParticipantEntry?.status === 'pending';
   
-  const pendingJoinRequests = participants.filter(p => p.status === 'pending'); // Filter participants for pending status
+  const pendingJoinRequests = participants.filter(p => p.status === 'pending'); 
   
-  const handleRequestJoin = () => { // No 'data' needed here, as it's typically just the user ID which is available from req.user._id
-    // You might want to pass an optional message here if your API supports it.
+  const handleRequestJoin = () => { 
     requestJoinMutation.mutate({ groupId: group._id, message: "I'd like to join!" });
   };
   const handleApprove = (requestId) => approveMutation.mutate({ groupId: group._id, requestId });

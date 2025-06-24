@@ -4,28 +4,24 @@ import { useGroup } from "../hooks/useGroup";
 import { GroupCard } from "../components/user_group_management/group_card";
 import { GroupDetails } from "../components/user_group_management/group_detail";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-
-// A mock user object for demonstration. 
-// In a real app, you would get this from your authentication context.
-const MOCK_USER = {
-  _id: "user123",
-  name: "Current User",
-  // ... other user properties
-};
+import { CreateGroupForm } from "../components/user_group_management/create_group_form";
+import { useAuth } from "../auth/authProvider";
+import { DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 
 export default function GroupsPage() {
+  const { user, isAuthenticated } = useAuth();
   const { group: allGroups, isLoading } = useGroup();
-  
-  // State to hold the group object for the detail view modal
-  const [selectedGroup, setSelectedGroup] = useState(null);
 
-  // Pagination State
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const groupsPerPage = 6;
   const totalPages = Math.ceil(allGroups.length / groupsPerPage);
 
-  // Get groups for current page
   const indexOfLastGroup = currentPage * groupsPerPage;
   const indexOfFirstGroup = indexOfLastGroup - groupsPerPage;
   const currentGroups = allGroups.slice(indexOfFirstGroup, indexOfLastGroup);
@@ -37,16 +33,14 @@ export default function GroupsPage() {
   const handleNext = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
-  
-  // This function is passed to the GroupCard to set the selected group
+
   const handleViewDetails = (groupToShow) => {
-      setSelectedGroup(groupToShow);
+    setSelectedGroup(groupToShow);
   };
-  
-  // This function closes the modal
+
   const handleCloseDetails = () => {
-      setSelectedGroup(null);
-  }
+    setSelectedGroup(null);
+  };
 
   return (
     <main className="container mx-auto pt-20 pb-16">
@@ -59,9 +53,16 @@ export default function GroupsPage() {
             Join existing hiking groups or create your own
           </p>
         </div>
-        <button className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors shadow-sm">
-          + Create Group
-        </button>
+        <Dialog open={createGroupOpen} onOpenChange={setCreateGroupOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-green-600 text-white hover:bg-green-700">
+              + Create Group
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl p-6">
+            <CreateGroupForm user={user} onSuccess={() => setCreateGroupOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {isLoading && <p className="text-center">Loading groups...</p>}
@@ -69,19 +70,12 @@ export default function GroupsPage() {
         <p className="text-center">No groups found.</p>
       )}
 
-      {/* Group Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-10">
         {currentGroups.map((g) => (
-          <GroupCard
-            key={g._id}
-            group={g}
-            // Pass the handler function to the onView prop
-            onView={handleViewDetails} 
-          />
+          <GroupCard key={g._id} group={g} onView={handleViewDetails} />
         ))}
       </div>
 
-      {/* Pagination */}
       {!isLoading && allGroups.length > 0 && (
         <div className="flex justify-center items-center gap-4 pt-8">
           <button
@@ -103,14 +97,14 @@ export default function GroupsPage() {
           </button>
         </div>
       )}
-      
-      {/* Detail Modal */}
-      {/* This dialog will appear whenever selectedGroup is not null */}
-      <Dialog open={!!selectedGroup} onOpenChange={(isOpen) => !isOpen && handleCloseDetails()}>
-          <DialogContent className="max-w-4xl p-0 border-0">
-              {/* Pass the selected group data and user data to the details component */}
-              <GroupDetails group={selectedGroup} user={MOCK_USER} />
-          </DialogContent>
+
+      <Dialog
+        open={!!selectedGroup}
+        onOpenChange={(isOpen) => !isOpen && handleCloseDetails()}
+      >
+        <DialogContent className="max-w-4xl p-0 border-0">
+          <GroupDetails group={selectedGroup} user={user} />
+        </DialogContent>
       </Dialog>
     </main>
   );
