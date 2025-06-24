@@ -1,22 +1,30 @@
+// src/pages/GroupsPage.jsx
 import { useState } from "react";
 import { useGroup } from "../hooks/useGroup";
-import { GroupCard } from "../components/admin/group_management/group_card";
-// import { GroupDetails } from "../components/admin/group_management/group_detail";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GroupCard } from "../components/user_group_management/group_card";
+import { GroupDetails } from "../components/user_group_management/group_detail";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CreateGroupForm } from "../components/user_group_management/create_group_form";
+import { useAuth } from "../auth/authProvider";
+import { DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
 
 export default function GroupsPage() {
-  const { group, isLoading } = useGroup();
-  const [selectedGroupId, setSelectedGroupId] = useState(null);
+  const { user, isAuthenticated } = useAuth();
+  const { group: allGroups, isLoading } = useGroup();
 
-  // Pagination State
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const groupsPerPage = 6;
-  const totalPages = Math.ceil(group.length / groupsPerPage);
+  const totalPages = Math.ceil(allGroups.length / groupsPerPage);
 
-  // Get groups for current page
   const indexOfLastGroup = currentPage * groupsPerPage;
   const indexOfFirstGroup = indexOfLastGroup - groupsPerPage;
-  const currentGroups = group.slice(indexOfFirstGroup, indexOfLastGroup);
+  const currentGroups = allGroups.slice(indexOfFirstGroup, indexOfLastGroup);
 
   const handlePrev = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -26,38 +34,49 @@ export default function GroupsPage() {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
+  const handleViewDetails = (groupToShow) => {
+    setSelectedGroup(groupToShow);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedGroup(null);
+  };
+
   return (
-    <main className="container mx-auto pt-24 pb-16">
-      <h1 className="text-2xl font-semibold mb-6 text-center">Group Management</h1>
+    <main className="container mx-auto pt-20 pb-16">
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-2 p-10">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            Hiking Groups
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Join existing hiking groups or create your own
+          </p>
+        </div>
+        <Dialog open={createGroupOpen} onOpenChange={setCreateGroupOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-green-600 text-white hover:bg-green-700">
+              + Create Group
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl p-6">
+            <CreateGroupForm user={user} onSuccess={() => setCreateGroupOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {isLoading && <p className="text-center">Loading groups...</p>}
-      {!isLoading && group.length === 0 && <p className="text-center">No groups found.</p>}
+      {!isLoading && allGroups.length === 0 && (
+        <p className="text-center">No groups found.</p>
+      )}
 
-      {/* Group Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-10">
         {currentGroups.map((g) => (
-          <div
-            key={g._id}
-            onClick={() => setSelectedGroupId(g._id)}
-            className="cursor-pointer transition-transform hover:scale-105"
-          >
-            <GroupCard
-              group={{
-                ...g,
-                trail: g.trail ?? {
-                  name: "Unknown",
-                  elevation: "N/A",
-                  duration: { min: "N/A", max: "N/A" },
-                  distance: "N/A",
-                },
-              }}
-            />
-          </div>
+          <GroupCard key={g._id} group={g} onView={handleViewDetails} />
         ))}
       </div>
 
-      {/* Pagination */}
-      {!isLoading && group.length > 0 && (
+      {!isLoading && allGroups.length > 0 && (
         <div className="flex justify-center items-center gap-4 pt-8">
           <button
             onClick={handlePrev}
@@ -78,6 +97,15 @@ export default function GroupsPage() {
           </button>
         </div>
       )}
+
+      <Dialog
+        open={!!selectedGroup}
+        onOpenChange={(isOpen) => !isOpen && handleCloseDetails()}
+      >
+        <DialogContent className="max-w-4xl p-0 border-0">
+          <GroupDetails group={selectedGroup} user={user} />
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

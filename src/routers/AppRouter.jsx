@@ -16,6 +16,7 @@ import AdminLayout from "../layouts/admin/AdminLayout";
 import GroupsPage from "../pages/GroupPage";
 import ProtectedRoute from "../components/protectedRoutes";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { GroupDetails } from "../components/user_group_management/group_detail";
 
 export default function AppRouter() {
   return (
@@ -48,6 +49,7 @@ export default function AppRouter() {
           <Route path="hikes" element={<GroupHikeManagementPage />} />
           <Route path="payments" element={<PaymentManagementPage />} />
           <Route path="trail" element={<TrailManagementPage />} />
+           <Route path="groups/:groupId" element={<GroupDetails/>} />
         </Route>
       </Routes>
     </BrowserRouter>

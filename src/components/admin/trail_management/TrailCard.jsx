@@ -21,33 +21,29 @@ const getDifficultyColor = (difficulty) => {
 export function TrailCard({ trail, onView, onEdit, onDelete }) {
   if (!trail) return null;
 
-  // --- Start of the URL logic ---
-
-  // 1. Define the server root URL, removing '/api' if it exists.
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const SERVER_ROOT_URL = API_BASE_URL ? API_BASE_URL.replace('/api', '') : 'http://localhost:5050';
 
-  // KEY FIX: A new, smarter function to handle both full URLs and relative paths.
+
   const getFullImageUrl = (path) => {
-    // If no path is provided, return the placeholder.
+ 
     if (!path) {
       return "/placeholder.svg";
     }
 
-    // If the path is already a full URL, use it directly.
+   
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
 
-    // Otherwise, it's a relative path, so build the full URL.
+   
     return `${SERVER_ROOT_URL}/${path}`;
   };
 
-  // 2. Use the new helper function with the first image from the array.
-  // The optional chaining `?.[0]` safely gets the first item if the array exists.
+  
   const imageUrl = getFullImageUrl(trail.images?.[0]);
 
-  // --- End of the URL logic ---
+ 
 
   return (
     <Card className="overflow-hidden flex flex-col h-full">

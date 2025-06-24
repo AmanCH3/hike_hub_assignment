@@ -9,6 +9,7 @@ import {
   requestToJoinGroupApi,
   approveJoinRequestApi,
   denyJoinRequestApi,
+  pendingJoinRequestApi,
 } from "../api/admin/groupApi";
 
 export const getAllGroupService = async () => {
@@ -74,3 +75,17 @@ export const approveJoinRequestService = (groupId, requestId) =>
 
 export const denyJoinRequestService = (groupId, requestId) =>
   denyJoinRequestApi(groupId, requestId);
+
+
+export const getAllPendingRequestsService = async () => {
+  try{
+
+    const response  = await pendingJoinRequestApi() ;
+    return response.data
+  }
+  catch(error){
+    console.error("Failed to fetch pending requests:", error);
+    throw error;
+  }
+
+}
