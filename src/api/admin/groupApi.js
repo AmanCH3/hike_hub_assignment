@@ -29,9 +29,13 @@ export const requestToJoinGroupApi = (id, data) => {
 };
 
 export const approveJoinRequestApi = (groupId, requestId) => {
-    return axios.post(`/group/${groupId}/requests/${requestId}/approve`);
+    return axios.patch(`/group/${groupId}/requests/${requestId}/approve`);
 };
 
 export const denyJoinRequestApi = (groupId, requestId) => {
-    return axios.post(`/group/${groupId}/requests/${requestId}/deny`);
+    return axios.patch(`/group/${groupId}/requests/${requestId}/deny`);
 };
+
+export const pendingJoinRequestApi = () =>{
+    return axios.get('/group/requests/pending')
+}

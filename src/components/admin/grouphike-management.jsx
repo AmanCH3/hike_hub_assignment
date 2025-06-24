@@ -100,7 +100,6 @@ export function GroupHikeManagement() {
       requirements: formData.requirements ? [formData.requirements] : [],
       difficulty: formData.difficulty,
     }
-
     updateGroupMutation.mutate({ id: selectedHikeId, data: updatedGroupData }, {
       onSuccess: () => setIsEditDialogOpen(false),
     })
@@ -115,6 +114,13 @@ export function GroupHikeManagement() {
       },
     })
   }
+
+  const handleManageParticipants = (group) => {
+    setSelectedGroup(group);
+    setIsViewOpen(true);
+  };
+
+
 
   return (
     <div className="space-y-6">
@@ -163,7 +169,7 @@ export function GroupHikeManagement() {
             </div>
           </CardContent>
         </Card>
-
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Confirmed Participants</CardTitle>
@@ -197,6 +203,7 @@ export function GroupHikeManagement() {
         setIsViewDialogOpen={setIsViewDialogOpen}
         setIsEditDialogOpen={setIsEditDialogOpen}
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        onManageParticipants={handleManageParticipants}
       />
 
       {/* View Dialog */}

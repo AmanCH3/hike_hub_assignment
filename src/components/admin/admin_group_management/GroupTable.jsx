@@ -193,7 +193,7 @@ export function GroupTable({
                                 }}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
-                                View Details
+                                View and Manage Particpants
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => {
@@ -204,14 +204,7 @@ export function GroupTable({
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit Hike
                               </DropdownMenuItem>
-                              <DropdownMenuItem
-                                 onClick={() => {
-                                   setSelectedHikeId(group._id)
-                                   setIsViewDialogOpen(true) // Open view dialog which shows requests
-                                 }}
-                              >
-                                 Manage Participants
-                              </DropdownMenuItem>
+      
                               <DropdownMenuItem className="text-destructive"
                                 onClick={() => {
                                   setSelectedHikeId(group._id)

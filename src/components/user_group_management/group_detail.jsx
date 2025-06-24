@@ -1,7 +1,7 @@
 // src/components/admin/group_management/group_detail.jsx
 "use client"
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,17 +22,12 @@ import {
   Check,
   X,
 } from "lucide-react";
+import { useRequestToJoinGroup , useApproveJoinRequest , useDenyJoinRequest } from "../../hooks/useGroup";
+import { JoinGroupDialog } from "./join_group_dailog";
 
-// --- Dummy Hooks for mutations (can be replaced with your actual logic) ---
-// Remember to replace these with actual hooks from your useGroup.jsx if they were passed
-// For example, if you imported them as:
-// import { useRequestToJoinGroup, useApproveJoinRequest, useDenyJoinRequest } from '@/hooks/useGroup';
-const useRequestToJoinGroup = () => ({ mutate: (payload) => console.log("Simulating Request to Join:", payload), isPending: false });
-const useApproveJoinRequest = () => ({ mutate: (payload) => console.log("Simulating Approve Join Request:", payload), isPending: false });
-const useDenyJoinRequest = () => ({ mutate: (payload) => console.log("Simulating Deny Join Request:", payload), isPending: false });
-// --- End Dummy Hooks ---
 
-// Utility for formatting duration
+
+
 const formatDuration = (duration) => {
     if (!duration) return 'N/A';
     if (typeof duration === 'object' && duration.min !== undefined && duration.max !== undefined) {
@@ -54,18 +49,21 @@ const getDifficultyBadgeColor = (difficulty) => {
 
 // NOTE: The component now receives `group` and `user` as props
 export function GroupDetails({ group, user }) {
+
+   const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
   // If no group data is passed, don't render anything.
   if (!group) {
     return <div className="text-center text-gray-500 mt-10">Group data is not available.</div>;
   }
   
   // All mutation hooks remain for functionality inside the modal
-  const requestJoinMutation = useRequestToJoinGroup(); // Replace with actual hook
-  const approveMutation = useApproveJoinRequest(); // Replace with actual hook
-  const denyMutation = useDenyJoinRequest(); // Replace with actual hook
+  const requestJoinMutation = useRequestToJoinGroup(); 
+  const approveMutation = useApproveJoinRequest(); 
+  const denyMutation = useDenyJoinRequest(); 
   
   // Destructure with default values for safety
   const {
+    _id : groupId,
     title,
     description,
     date,
@@ -100,14 +98,22 @@ export function GroupDetails({ group, user }) {
   const hasPendingRequest = currentUserParticipantEntry?.status === 'pending';
   
   const pendingJoinRequests = participants.filter(p => p.status === 'pending'); 
-  
-  const handleRequestJoin = () => { 
-    requestJoinMutation.mutate({ groupId: group._id, message: "I'd like to join!" });
+
+    const handleSendJoinRequest = ({ message }) => {
+    requestJoinMutation.mutate({ groupId, data: { message } });
   };
-  const handleApprove = (requestId) => approveMutation.mutate({ groupId: group._id, requestId });
-  const handleDeny = (requestId) => denyMutation.mutate({ groupId: group._id, requestId });
+  const handleApprove = (requestId) => approveMutation.mutate({ groupId, requestId });
+  const handleDeny = (requestId) => denyMutation.mutate({groupId, requestId });
 
   return (
+    <>
+     <JoinGroupDialog
+        open={isJoinDialogOpen}
+        setOpen={setJoinDialogOpen}
+        groupTitle={group.title}
+        onJoin={handleSendJoinRequest} 
+      />
+
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6 max-h-[90vh] overflow-y-auto">
       <div className="lg:col-span-2 space-y-8">
         <Card className="overflow-hidden">
@@ -124,15 +130,15 @@ export function GroupDetails({ group, user }) {
             </div>
             <p className="text-gray-600 mb-6">{description}</p>
               {!isCurrentUserConfirmedParticipant && !isCurrentUserLeader && (
-                <Button onClick={handleRequestJoin} disabled={isGroupFull || hasPendingRequest || requestJoinMutation.isPending} size="lg" className="w-full bg-green-600 hover:bg-green-700 text-lg">
+                <Button onClick={() => setJoinDialogOpen(true)} disabled={isGroupFull || hasPendingRequest || requestJoinMutation.isPending} size="lg" className="w-full bg-green-600 hover:bg-green-700 text-lg">
                     {hasPendingRequest ? "Request Pending" : isGroupFull ? "Group Full" : "Request to Join"}
                 </Button>
             )}
             {isCurrentUserConfirmedParticipant && !isCurrentUserLeader && (
-                <Badge className="w-full justify-center py-2 text-lg bg-blue-100 text-blue-800">You are a participant!</Badge>
+                <Badge className="w-full justify-center py-2 text-lg bg-blue-100 text-red-500">You are a participant!</Badge>
             )}
             {isCurrentUserLeader && (
-                <Badge className="w-full justify-center py-2 text-lg bg-purple-100 text-purple-800">You are the leader!</Badge>
+                <Badge className="w-full justify-center py-2 text-lg bg-blue-50 text-purple-800">You are the leader!</Badge>
             )}
           </CardContent>
         </Card>
@@ -159,24 +165,24 @@ export function GroupDetails({ group, user }) {
                 <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {photos.map((photo, index) => (
-                            <img
+                          <img
                                 key={index}
                                 src={`http://localhost:5050/${photo}`} // Adjust path if needed
                                 alt={`Group hike ${index + 1}`}
                                 className="w-full h-32 object-cover rounded-md shadow-sm"
-                            />
-                        ))}
+                                />
+                              ))}
                     </div>
                 </CardContent>
             </Card>
         )}
 
         {comments && comments.length > 0 && (
-            <Card>
+          <Card>
                 <CardHeader><CardTitle className="text-xl">Comments</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     {comments.map((comment) => (
-                        <div key={comment._id || comment.id} className="border-b pb-3 last:border-b-0">
+                      <div key={comment._id || comment.id} className="border-b pb-3 last:border-b-0">
                             <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
                                 {comment.user?.name || 'Anonymous'}
                                 <span className="text-gray-500 text-xs font-normal">
@@ -206,7 +212,7 @@ export function GroupDetails({ group, user }) {
                 {/* Assuming leader also has rating and hikesLed stats from User model */}
                 <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
                     {leader?.stats?.totalHikes !== undefined && (
-                        <>
+                      <>
                             <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                             <span className="font-semibold text-gray-700">{leader?.averageRating?.toFixed(1) || 'N/A'}</span> {/* Assuming averageRating exists on User model for leaders */}
                             <span className="text-gray-400">•</span>
@@ -270,5 +276,6 @@ export function GroupDetails({ group, user }) {
         </Card>
       </div>
     </div>
+        </>
   );
 }

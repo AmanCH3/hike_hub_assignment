@@ -1,5 +1,5 @@
 import { useQuery , useMutation , useQueryClient } from "@tanstack/react-query";
-import { createOneGroupService , updateOneGroupService, getAllGroupService , getOneGroupService , deleteOneGroupService , joinOneGroupService, denyJoinRequestService, approveJoinRequestService, requestToJoinGroupService } from "../services/groupService";
+import { createOneGroupService , updateOneGroupService, getAllGroupService , getOneGroupService , deleteOneGroupService , joinOneGroupService, denyJoinRequestService, approveJoinRequestService, requestToJoinGroupService, getAllPendingRequestsService } from "../services/groupService";
 import { toast } from "react-toastify";
 import { useState } from "react";
 
@@ -105,6 +105,14 @@ export const useUpdateOneGroup = () => {
     )
 }
 
+export const useGetAllPendingRequests = () => {
+    return useQuery({
+     
+        queryKey: ['pending_requests'], 
+        queryFn: getAllPendingRequestsService,
+        refetchInterval: 60000, 
+    });
+};
 
 
 export const useJoinGroup = () => {
@@ -130,6 +138,7 @@ export const useRequestToJoinGroup = () => {
         onSuccess: (data) => {
             toast.success(data?.message || "Request sent to admin for approval!");
             queryClient.invalidateQueries({ queryKey: ['group_detail', data?.data?.groupId] });
+            queryClient.invalidateQueries({ queryKey: ['pending_requests'] });
         },
         onError: (err) => {
             toast.error(err?.message || "Failed to send request.");

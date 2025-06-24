@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar } from "recharts"
-import { Users, MapPin, Mountain, DollarSign, TrendingUp, Calendar, AlertCircle } from "lucide-react"
+import { Users, MapPin, Mountain, DollarSign, TrendingUp, Calendar, AlertCircle, X, Check, Clock, Loader2 } from "lucide-react"
+import { useGetAllPendingRequests , useApproveJoinRequest , useDenyJoinRequest } from "../../hooks/useGroup"
 
 const userGrowthData = [
   { month: "Jan", users: 1200, revenue: 15000 },
@@ -24,6 +25,38 @@ const hikeData = [
   { month: "May", completed: 82, cancelled: 6 },
   { month: "Jun", completed: 95, cancelled: 2 },
 ]
+
+const pendingJoinRequests = [
+  {
+    id: 1,
+    groupName: "Weekend Warriors",
+    trailName: "Mount Washington Trail",
+    date: "2024-07-15",
+    difficulty: "Moderate",
+    requesterName: "John Smith",
+    requestTime: "2 hours ago",
+  },
+  {
+    id: 2,
+    groupName: "Sunrise Hikers",
+    trailName: "Blue Ridge Parkway",
+    date: "2024-07-20",
+    difficulty: "Easy",
+    requesterName: "Lisa Chen",
+    requestTime: "4 hours ago",
+  },
+  {
+    id: 3,
+    groupName: "Mountain Climbers",
+    trailName: "Rocky Mountain Peak",
+    date: "2024-07-25",
+    difficulty: "Hard",
+    requesterName: "Mike Johnson",
+    requestTime: "1 day ago",
+  },
+]
+
+
 
 const recentActivities = [
   {
@@ -61,6 +94,32 @@ const recentActivities = [
 ]
 
 export function DashboardHome() {
+   const { data: pendingRequestsData, isLoading: isLoadingRequests } = useGetAllPendingRequests();
+   const approveMutation = useApproveJoinRequest();
+  const denyMutation = useDenyJoinRequest();
+
+    const pendingJoinRequests = pendingRequestsData?.data || [];
+
+   const handleApproveRequest = (requestId, groupId) => {
+    approveMutation.mutate({ requestId, groupId });
+  };
+
+ const handleDenyRequest = (requestId, groupId) => {
+    denyMutation.mutate({ requestId, groupId });
+  };
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty.toLowerCase()) {
+      case 'easy':
+        return 'text-green-600 bg-green-50';
+      case 'moderate':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'hard':
+        return 'text-red-600 bg-red-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -272,33 +331,110 @@ export function DashboardHome() {
         </Card>
       </div>
 
-      {/* System Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>System Status</CardTitle>
-          <CardDescription>Current system health and alerts</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-sm">API Status: Online</span>
+      {/* System Status and Join Requests */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>System Status</CardTitle>
+            <CardDescription>Current system health and alerts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span className="text-sm">API Status: Online</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span className="text-sm">Database: Healthy</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                <span className="text-sm">Storage: 78% Used</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span className="text-sm">Payments: Active</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-sm">Database: Healthy</span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Pending Join Requests
+            </CardTitle>
+            <CardDescription>Group join requests awaiting approval</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4 max-h-[300px] overflow-y-auto">
+              {/* 3. Add loading state */}
+              {isLoadingRequests ? (
+                <div className="flex justify-center items-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : pendingJoinRequests.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No pending requests
+                </p>
+              ) : (
+                // 4. Map over REAL data from the hook
+                pendingJoinRequests.map((request) => (
+                  <div key={request._id} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-sm">{request.group?.title}</span>
+                          <span className="text-xs text-muted-foreground">•</span>
+                          <span className="text-xs text-muted-foreground">{request.group?.trail?.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{new Date(request.group?.date).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <span className={`px-2 py-1 rounded-full font-medium ${getDifficultyColor(request.group?.trail?.difficult)}`}>
+                            {request.group?.trail?.difficult}
+                          </span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="font-medium">{request.user?.name}</span>
+                          <span className="text-muted-foreground"> requested to join.</span>
+                        </div>
+                        {request.message && (
+                            <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded-md border">"{request.message}"</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 ml-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          // Pass the correct IDs from the live data
+                          onClick={() => handleApproveRequest(request._id, request.group._id)}
+                          disabled={approveMutation.isPending || denyMutation.isPending}
+                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          // Pass the correct IDs from the live data
+                          onClick={() => handleDenyRequest(request._id, request.group._id)}
+                          disabled={approveMutation.isPending || denyMutation.isPending}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
-              <span className="text-sm">Storage: 78% Used</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-sm">Payments: Active</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
