@@ -1,397 +1,275 @@
+// src/components/admin/group_management/group_detail.jsx
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import {
   CalendarDays,
   MapPin,
   Clock,
   Mountain,
-  Navigation,
-  CheckCircle2,
-  AlertCircle,
-  MessageSquare,
+  Navigation, // Not used, consider removing
   Share2,
-  Edit,
-  Trash2,
-} from "lucide-react"
+  Star,
+  CloudSun, // Not used, consider removing
+  Thermometer, // Not used, consider removing
+  Droplets, // Not used, consider removing
+  Route,
+  Check,
+  X,
+} from "lucide-react";
 
-// Mock group data - in real app, this would come from API
-const mockGroup = {
-  id: 1,
-  title: "Sunrise Hike at Mt. Rainier",
-  description:
-    "Experience the magic of sunrise from the stunning viewpoint at Mt. Rainier. Perfect for photographers and early birds! We'll start early to catch the golden hour and enjoy breakfast at the summit.",
-  date: "May 15, 2025",
-  time: "5:30 AM",
-  location: "Mt. Rainier National Park",
-  maxSize: 8,
-  currentSize: 6,
-  status: "upcoming",
-  leader: {
-    id: 1,
-    name: "Sarah Johnson",
-    image: "/placeholder.svg?height=100&width=100",
-    hikerType: "experienced",
-    rating: 4.8,
-    hikesLed: 12,
-  },
-  trail: {
-    name: "Eagle Peak Trail",
-    distance: "7.5 km",
-    elevation: "650 m",
-    duration: "4-5 hours",
-    difficulty: "Moderate",
-  },
-  meetingPoint: {
-    description: "Paradise Visitor Center Parking Lot",
-    coordinates: {
-      latitude: 46.7869,
-      longitude: -121.7356,
-    },
-  },
-  participants: [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      image: "/placeholder.svg?height=100&width=100",
-      hikerType: "experienced",
-      status: "confirmed",
-      isLeader: true,
-    },
-    {
-      id: 2,
-      name: "Mike Chen",
-      image: "/placeholder.svg?height=100&width=100",
-      hikerType: "experienced",
-      status: "confirmed",
-      isLeader: false,
-    },
-    {
-      id: 3,
-      name: "Emma Davis",
-      image: "/placeholder.svg?height=100&width=100",
-      hikerType: "new",
-      status: "confirmed",
-      isLeader: false,
-    },
-    {
-      id: 4,
-      name: "Alex Rivera",
-      image: "/placeholder.svg?height=100&width=100",
-      hikerType: "experienced",
-      status: "confirmed",
-      isLeader: false,
-    },
-    {
-      id: 5,
-      name: "Lisa Park",
-      image: "/placeholder.svg?height=100&width=100",
-      hikerType: "new",
-      status: "pending",
-      isLeader: false,
-    },
-    {
-      id: 6,
-      name: "David Kim",
-      image: "/placeholder.svg?height=100&width=100",
-      hikerType: "experienced",
-      status: "confirmed",
-      isLeader: false,
-    },
-  ],
-  requirements: [
-    "Bring headlamp or flashlight",
-    "Warm layers for early morning",
-    "Camera for sunrise photos",
-    "Breakfast/snacks",
-    "Minimum intermediate hiking experience",
-  ],
-  weather: {
-    condition: "Clear skies",
-    temperature: "12°C - 18°C",
-    precipitation: "0%",
-  },
+// --- Dummy Hooks for mutations (can be replaced with your actual logic) ---
+// Remember to replace these with actual hooks from your useGroup.jsx if they were passed
+// For example, if you imported them as:
+// import { useRequestToJoinGroup, useApproveJoinRequest, useDenyJoinRequest } from '@/hooks/useGroup';
+const useRequestToJoinGroup = () => ({ mutate: (payload) => console.log("Simulating Request to Join:", payload), isPending: false });
+const useApproveJoinRequest = () => ({ mutate: (payload) => console.log("Simulating Approve Join Request:", payload), isPending: false });
+const useDenyJoinRequest = () => ({ mutate: (payload) => console.log("Simulating Deny Join Request:", payload), isPending: false });
+// --- End Dummy Hooks ---
+
+// Utility for formatting duration
+const formatDuration = (duration) => {
+    if (!duration) return 'N/A';
+    if (typeof duration === 'object' && duration.min !== undefined && duration.max !== undefined) {
+        if (duration.min === duration.max) return `${duration.max} hours`;
+        return `${duration.min}-${duration.max} hours`;
+    }
+    return `${duration} hours`;
+};
+
+// Helper to get the correct color for the difficulty badge
+const getDifficultyBadgeColor = (difficulty) => {
+    switch (difficulty) {
+        case 'Easy': return 'bg-green-100 text-green-800 hover:bg-green-100';
+        case 'Moderate': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
+        case 'Difficult': return 'bg-red-100 text-red-800 hover:bg-red-100'; // Corrected 'Hard' to 'Difficult'
+        default: return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+    }
 }
 
-
-export function GroupDetails({ groupId }) {
-  const [isJoined, setIsJoined] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [currentUser] = useState({ id: 999, name: "Current User" }) // Mock current user
-
-  const handleJoinGroup = async () => {
-    setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsJoined(true)
-      setIsLoading(false)
-    }, 1000)
+// NOTE: The component now receives `group` and `user` as props
+export function GroupDetails({ group, user }) {
+  // If no group data is passed, don't render anything.
+  if (!group) {
+    return <div className="text-center text-gray-500 mt-10">Group data is not available.</div>;
   }
+  
+  // All mutation hooks remain for functionality inside the modal
+  const requestJoinMutation = useRequestToJoinGroup(); // Replace with actual hook
+  const approveMutation = useApproveJoinRequest(); // Replace with actual hook
+  const denyMutation = useDenyJoinRequest(); // Replace with actual hook
+  
+  // Destructure with default values for safety
+  const {
+    title,
+    description,
+    date,
+    maxSize,
+    leader, // leader will be populated User object
+    participants = [], // participants array from model
+    status, // status from model
+    meetingPoint, // meetingPoint from model
+    requirements = [], // requirements from model
+    difficulty, // difficulty from model
+    photos = [], // photos from model
+    comments = [], // comments from model
+    trail, // trail will be populated Trail object
+  } = group;
 
-  const handleLeaveGroup = async () => {
-    setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsJoined(false)
-      setIsLoading(false)
-    }, 1000)
-  }
-
-  const isGroupFull = mockGroup.currentSize >= mockGroup.maxSize
-  const isCurrentUserLeader = mockGroup.leader.id === currentUser.id
-  const isCurrentUserParticipant = mockGroup.participants.some((p) => p.id === currentUser.id) || isJoined
+  // Assuming 'time' and 'location' are part of the 'group' object or derived from 'meetingPoint' / 'trail'
+  // If 'time' is not explicitly on group, you might need to derive it from 'date' or add it to the model.
+  // For 'location', use trail?.location or meetingPoint?.description as appropriate.
+  const displayTime = new Date(date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const displayLocation = trail?.location || meetingPoint?.description || 'Not specified';
+  const displayDate = new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  
+  // Filter confirmed participants
+  const confirmedParticipants = participants.filter(p => p.status === 'confirmed');
+  const currentSize = confirmedParticipants.length;
+  const isGroupFull = currentSize >= maxSize;
+  
+  // Identify current user's role and request status
+  const isCurrentUserLeader = leader?._id === user?._id;
+  const currentUserParticipantEntry = participants.find(p => p.user?._id === user?._id); // Find any entry for current user
+  const isCurrentUserConfirmedParticipant = currentUserParticipantEntry?.status === 'confirmed';
+  const hasPendingRequest = currentUserParticipantEntry?.status === 'pending';
+  
+  const pendingJoinRequests = participants.filter(p => p.status === 'pending'); // Filter participants for pending status
+  
+  const handleRequestJoin = () => { // No 'data' needed here, as it's typically just the user ID which is available from req.user._id
+    // You might want to pass an optional message here if your API supports it.
+    requestJoinMutation.mutate({ groupId: group._id, message: "I'd like to join!" });
+  };
+  const handleApprove = (requestId) => approveMutation.mutate({ groupId: group._id, requestId });
+  const handleDeny = (requestId) => denyMutation.mutate({ groupId: group._id, requestId });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Main Content */}
-      <div className="lg:col-span-2 space-y-6">
-        {/* Group Header */}
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div className="space-y-2">
-                <CardTitle className="text-2xl">{mockGroup.title}</CardTitle>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center">
-                    <CalendarDays className="h-4 w-4 mr-1" />
-                    <span>
-                      {mockGroup.date} at {mockGroup.time}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{mockGroup.location}</span>
-                  </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6 max-h-[90vh] overflow-y-auto">
+      <div className="lg:col-span-2 space-y-8">
+        <Card className="overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{title}</h1>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-500 mt-2">
+                  <div className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4" /><span>{displayDate} at {displayTime}</span></div>
+                  <div className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /><span>{displayLocation}</span></div>
                 </div>
               </div>
-              <div className="flex gap-2">
-                {isCurrentUserLeader && (
-                  <>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                  </>
-                )}
-                <Button variant="outline" size="sm">
-                  <Share2 className="h-4 w-4 mr-1" />
-                  Share
-                </Button>
-              </div>
+              <Button variant="outline" size="sm" className="hidden sm:inline-flex"><Share2 className="h-4 w-4 mr-2" />Share</Button>
             </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">{mockGroup.description}</p>
-
-            {/* Status Alert */}
-            {isGroupFull && !isCurrentUserParticipant && (
-              <Alert className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  This group is currently full. You can join the waitlist to be notified if a spot opens up.
-                </AlertDescription>
-              </Alert>
+            <p className="text-gray-600 mb-6">{description}</p>
+              {!isCurrentUserConfirmedParticipant && !isCurrentUserLeader && (
+                <Button onClick={handleRequestJoin} disabled={isGroupFull || hasPendingRequest || requestJoinMutation.isPending} size="lg" className="w-full bg-green-600 hover:bg-green-700 text-lg">
+                    {hasPendingRequest ? "Request Pending" : isGroupFull ? "Group Full" : "Request to Join"}
+                </Button>
             )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              {!isCurrentUserParticipant && !isCurrentUserLeader && (
-                <Button onClick={handleJoinGroup} disabled={isLoading || (isGroupFull && !isJoined)} className="flex-1">
-                  {isLoading ? "Joining..." : isGroupFull ? "Join Waitlist" : "Join Group"}
-                </Button>
-              )}
-
-              {isCurrentUserParticipant && !isCurrentUserLeader && (
-                <Button variant="outline" onClick={handleLeaveGroup} disabled={isLoading} className="flex-1">
-                  {isLoading ? "Leaving..." : "Leave Group"}
-                </Button>
-              )}
-
-              {(isCurrentUserParticipant || isCurrentUserLeader) && (
-                <Button variant="outline" className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Open Chat
-                </Button>
-              )}
-            </div>
+            {isCurrentUserConfirmedParticipant && !isCurrentUserLeader && (
+                <Badge className="w-full justify-center py-2 text-lg bg-blue-100 text-blue-800">You are a participant!</Badge>
+            )}
+            {isCurrentUserLeader && (
+                <Badge className="w-full justify-center py-2 text-lg bg-purple-100 text-purple-800">You are the leader!</Badge>
+            )}
           </CardContent>
         </Card>
 
-        {/* Trail Information */}
         <Card>
-          <CardHeader>
-            <CardTitle>Trail Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardHeader><CardTitle className="text-xl">Trail Information</CardTitle></CardHeader>
+          <CardContent className="space-y-6">
               <div>
-                <h4 className="font-semibold mb-2">{mockGroup.trail.name}</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm font-medium">Distance</div>
-                      <div className="text-sm text-muted-foreground">{mockGroup.trail.distance}</div>
-                    </div>
+                  <h3 className="text-lg font-semibold text-gray-800">{trail?.name}</h3>
+                  <p className="text-sm text-gray-600 mb-4">{trail?.description}</p> {/* Added trail description if available */}
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6">
+                      <div className="flex gap-3 items-center"><Route className="h-6 w-6 text-indigo-600"/><div className="text-sm"><div className="text-gray-500">Distance</div><div className="font-semibold text-gray-800">{trail?.distance} km</div></div></div>
+                      <div className="flex gap-3 items-center"><Mountain className="h-6 w-6 text-indigo-600"/><div className="text-sm"><div className="text-gray-500">Elevation</div><div className="font-semibold text-gray-800">{trail?.elevation} m</div></div></div>
+                      <div className="flex gap-3 items-center"><Clock className="h-6 w-6 text-indigo-600"/><div className="text-sm"><div className="text-gray-500">Duration</div><div className="font-semibold text-gray-800">{formatDuration(trail?.duration)}</div></div></div>
+                      <div><div className="text-sm text-gray-500 mb-1">Difficulty</div><Badge className={getDifficultyBadgeColor(trail?.difficult)}>{trail?.difficult}</Badge></div> {/* Use trail?.difficult for trail difficulty */}
                   </div>
-                  <div className="flex items-center">
-                    <Mountain className="h-4 w-4 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm font-medium">Elevation</div>
-                      <div className="text-sm text-muted-foreground">{mockGroup.trail.elevation}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm font-medium">Duration</div>
-                      <div className="text-sm text-muted-foreground">{mockGroup.trail.duration}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium mb-1">Difficulty</div>
-                    <Badge
-                      variant={
-                        mockGroup.trail.difficulty === "Easy"
-                          ? "default"
-                          : mockGroup.trail.difficulty === "Moderate"
-                            ? "secondary"
-                            : "destructive"
-                      }
-                    >
-                      {mockGroup.trail.difficulty}
-                    </Badge>
-                  </div>
-                </div>
               </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="font-semibold mb-2">Meeting Point</h4>
-                <div className="flex items-start gap-2">
-                  <Navigation className="h-4 w-4 text-primary mt-1" />
-                  <div>
-                    <div className="font-medium">{mockGroup.meetingPoint.description}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {mockGroup.meetingPoint.coordinates.latitude}, {mockGroup.meetingPoint.coordinates.longitude}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="font-semibold mb-2">Weather Forecast</h4>
-                <div className="text-sm">
-                  <div>
-                    <strong>Condition:</strong> {mockGroup.weather.condition}
-                  </div>
-                  <div>
-                    <strong>Temperature:</strong> {mockGroup.weather.temperature}
-                  </div>
-                  <div>
-                    <strong>Precipitation:</strong> {mockGroup.weather.precipitation}
-                  </div>
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
-        {/* Requirements */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Requirements & Recommendations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {mockGroup.requirements.map((requirement, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">{requirement}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        {photos && photos.length > 0 && (
+            <Card>
+                <CardHeader><CardTitle className="text-xl">Photos</CardTitle></CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {photos.map((photo, index) => (
+                            <img
+                                key={index}
+                                src={`http://localhost:5050/${photo}`} // Adjust path if needed
+                                alt={`Group hike ${index + 1}`}
+                                className="w-full h-32 object-cover rounded-md shadow-sm"
+                            />
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        )}
+
+        {comments && comments.length > 0 && (
+            <Card>
+                <CardHeader><CardTitle className="text-xl">Comments</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                    {comments.map((comment) => (
+                        <div key={comment._id || comment.id} className="border-b pb-3 last:border-b-0">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                                {comment.user?.name || 'Anonymous'}
+                                <span className="text-gray-500 text-xs font-normal">
+                                    {new Date(comment.createAt).toLocaleString()}
+                                </span>
+                            </div>
+                            <p className="text-gray-700 mt-1">{comment.text}</p>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+        )}
       </div>
 
-      {/* Sidebar */}
-      <div className="space-y-6">
-        {/* Group Leader */}
+      <div className="space-y-8">
         <Card>
-          <CardHeader>
-            <CardTitle>Group Leader</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle className="text-xl">Group Leader</CardTitle></CardHeader>
           <CardContent>
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={mockGroup.leader.image || "/placeholder.svg"} alt={mockGroup.leader.name} />
-                <AvatarFallback>{mockGroup.leader.name.substring(0, 2)}</AvatarFallback>
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={leader?.profileImage} alt={leader?.name} /> {/* Use profileImage from User model */}
+                <AvatarFallback>{leader?.name?.substring(0, 2) || "L"}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <div className="font-semibold">{mockGroup.leader.name}</div>
-                <div className="text-sm text-muted-foreground capitalize">{mockGroup.leader.hikerType} Hiker</div>
-                <div className="text-sm text-muted-foreground">
-                  ⭐ {mockGroup.leader.rating} • {mockGroup.leader.hikesLed} hikes led
+              <div>
+                <div className="font-bold text-lg text-gray-800">{leader?.name}</div>
+                <div className="text-sm text-gray-500">{leader?.hikerType} Hiker</div>
+                {/* Assuming leader also has rating and hikesLed stats from User model */}
+                <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                    {leader?.stats?.totalHikes !== undefined && (
+                        <>
+                            <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                            <span className="font-semibold text-gray-700">{leader?.averageRating?.toFixed(1) || 'N/A'}</span> {/* Assuming averageRating exists on User model for leaders */}
+                            <span className="text-gray-400">•</span>
+                            <span>{leader?.stats?.hikesLed} hikes led</span> {/* Access from stats.hikesLed */}
+                        </>
+                    )}
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Participants */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Participants</span>
-              <Badge variant="outline">
-                {mockGroup.currentSize}/{mockGroup.maxSize}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {mockGroup.participants.map((participant) => (
-                <div key={participant.id} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={participant.image || "/placeholder.svg"} alt={participant.name} />
-                      <AvatarFallback>{participant.name.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="text-sm font-medium flex items-center gap-1">
-                        {participant.name}
-                        {participant.isLeader && (
-                          <Badge variant="secondary" className="text-xs">
-                            Leader
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground capitalize">{participant.hikerType}</div>
+        {isCurrentUserLeader && pendingJoinRequests.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle className="text-xl">Join Requests ({pendingJoinRequests.length})</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              {pendingJoinRequests.map(req => (
+                <div key={req._id} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <Avatar className="h-10 w-10">
+                            <AvatarImage src={req.user?.profileImage} alt={req.user?.name} /> {/* Use profileImage from User model */}
+                            <AvatarFallback>{req.user?.name?.substring(0, 2) || "U"}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <div className="font-medium text-sm text-gray-800">{req.user?.name}</div>
+                            <p className="text-xs text-gray-500 line-clamp-1" title={req.message}>{req.message || 'No message.'}</p>
+                        </div>
                     </div>
-                  </div>
-                  <Badge variant={participant.status === "confirmed" ? "default" : "secondary"} className="text-xs">
-                    {participant.status}
-                  </Badge>
+                    <div className="flex gap-2">
+                        <Button size="icon" variant="outline" className="h-8 w-8 bg-green-100 hover:bg-green-200" onClick={() => handleApprove(req._id)} disabled={approveMutation.isPending}><Check className="h-4 w-4 text-green-700"/></Button>
+                        <Button size="icon" variant="outline" className="h-8 w-8 bg-red-100 hover:bg-red-200" onClick={() => handleDeny(req._id)} disabled={denyMutation.isPending}><X className="h-4 w-4 text-red-700"/></Button>
+                    </div>
                 </div>
               ))}
-            </div>
-          </CardContent>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader><CardTitle className="flex items-center justify-between text-xl"><span>Participants</span><Badge variant="secondary">{currentSize}/{maxSize}</Badge></CardTitle></CardHeader>
+          <CardContent><div className="space-y-4">
+            {confirmedParticipants.map((p) => (
+              <div key={p._id} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={p.user?.profileImage} alt={p.user?.name} /> {/* Access profileImage from p.user */}
+                    <AvatarFallback>{p.user?.name?.charAt(0) || "P"}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                      <div className="font-medium text-sm text-gray-800 flex items-center gap-2">
+                        {p.user?.name}
+                        {p.user?._id === leader?._id && <Badge className="bg-indigo-100 text-indigo-700 text-xs hover:bg-indigo-100">Leader</Badge>} {/* Check if this participant is also the leader */}
+                      </div>
+                      <div className="text-xs text-gray-500">{p.user?.hikerType}</div> {/* Access hikerType from p.user */}
+                  </div>
+                </div>
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Confirmed</Badge>
+              </div>
+            ))}
+          </div></CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

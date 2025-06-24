@@ -1,21 +1,32 @@
 import { useQuery , useMutation , useQueryClient } from "@tanstack/react-query";
 import { createOneGroupService , updateOneGroupService, getAllGroupService , getOneGroupService , deleteOneGroupService , joinOneGroupService, denyJoinRequestService, approveJoinRequestService } from "../services/groupService";
 import { toast } from "react-toastify";
-import { deleteOneTrailService } from "../services/admin/trailService";
+import { useState } from "react";
 
 
-export const useGroup = () => {
+
+export const useGroup = (initialPage = 1, initialLimit = 10, initialSearch = "") => {
+
+    const [page, setPage] = useState(initialPage);
+  const [limit, setLimit] = useState(initialLimit);
+  const [search, setSearch] = useState(initialSearch);
     const query = useQuery (
         {
-            queryKey : ['admin_group'],
-            queryFn : () => getAllGroupService()
+            queryKey : ['group', page , limit, search],
+            queryFn : () => getAllGroupService() ,
+             keepPreviousData: true,
         }
     )
 
-    const group = query.data?.data || []
+    const group = query.data?.data || []  
+    const pagination = query.data?.pagination || { total: 0, page: initialPage, limit: initialLimit, totalPages: 1 };  
     return  {
         ...query ,
-        group
+        group ,
+         pagination,
+    setPage,
+    setLimit,
+    setSearch
     }
 }
 
@@ -59,7 +70,7 @@ export const useUpdateOneGroup = () => {
             mutationFn : ({id , data}) => updateOneGroupService(id, data) ,
             mutationKey : ["group_update"] ,
             onSuccess : () => {
-                toast.success("Updated")
+                toast.success("Group updated successfully!")
                 queryClient.invalidateQueries(
                     [
                         "group" , "group_detail"
@@ -67,30 +78,13 @@ export const useUpdateOneGroup = () => {
                 )
             } ,
             onError : (err) => {
-                toast.error(err.message || "Updated failed")
+                toast.error(err.message || "Group update failed")
             }
         }
     )
 }
 
-export const useDeleteOneGroup  = () => {
-    const queryClient = useQueryClient()
-    return useMutation (
-        {
-            mutationKey : ['group_delete'] ,
-            mutationFn : deleteOneGroupService ,
-            onSuccess : () => {
-                toast.success("Group deleted successful")
-                queryClient.invalidateQueries(
-                    (['group'])
-                )
-            } ,
-            onError : (err) =>{
-                toast.error(err.message || "Delete Failed")
-            }
-        }
-    )
-}
+
 
 export const useJoinGroup = () => {
   const queryClient = useQueryClient();

@@ -15,7 +15,6 @@ export function JoinGroupDialog({ open, setOpen, groupTitle, onJoin }) {
   const [message, setMessage] = useState("");
 
   const handleJoin = () => {
-    // Pass the message to the onJoin handler
     onJoin({ message });
   };
 
