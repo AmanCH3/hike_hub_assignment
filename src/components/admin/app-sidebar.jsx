@@ -16,6 +16,7 @@
   import { useState } from "react";
   import { LogoutModal } from "./logout-modal";
 import { useAuth } from "../../auth/authProvider";
+import { Link } from "react-router-dom";
 
   const data = {
     navMain: [
@@ -24,7 +25,7 @@ import { useAuth } from "../../auth/authProvider";
         items: [
           {
             title: "Dashboard",
-            url: "/",
+            url: "/admin/dashboard",
             icon: Home,
             isActive: true,
           },
@@ -65,16 +66,6 @@ import { useAuth } from "../../auth/authProvider";
           },
         ],
       },
-      // {
-      //   title: "logout",
-      //   items: [
-      //     {
-      //       title: "logout",
-      //       url: "/admin/logout",
-      //       icon: Settings,
-      //     },
-      //   ],
-      // },
     ],
     navBottom: [
         { title: "Logout", action: "logout" , icon : LogOut},
@@ -122,10 +113,10 @@ import { useAuth } from "../../auth/authProvider";
                                       {group.items.map((item) => (
                                           <SidebarMenuItem key={item.title}>
                                               <SidebarMenuButton asChild isActive={item.isActive}>
-                                                  <a href={item.url}>
+                                                  <Link to={item.url}>
                                                       <item.icon className="h-4 w-4" />
                                                       <span>{item.title}</span>
-                                                  </a>
+                                                  </Link>
                                               </SidebarMenuButton>
                                           </SidebarMenuItem>
                                       ))}
@@ -141,7 +132,7 @@ import { useAuth } from "../../auth/authProvider";
                                   {data.navBottom.map((item) => (
                                       <SidebarMenuItem key={item.title}>
                                           {item.action === 'logout' ? (
-                                              <SidebarMenuButton onClick={handleLogoutClick} className="w-full text-red-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/50 dark:text-red-500">
+                                              <SidebarMenuButton onClick={handleLogoutClick} className="w-[200px] text-red-500 hover:bg-green hover:text-red-600 dark:hover:bg-white-900/50 dark:text-red-500">
                                                   <item.icon className="h-4 w-4" />
                                                   <span>{item.title}</span>
                                               </SidebarMenuButton>

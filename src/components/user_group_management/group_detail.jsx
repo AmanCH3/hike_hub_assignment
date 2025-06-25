@@ -51,9 +51,6 @@ const getDifficultyBadgeColor = (difficulty) => {
 // NOTE: The component now receives `group` and `user` as props
 export function GroupDetails({ group, user }) {
 
-  if (!group || !user) { // Also check for user
-    return <div className="text-center text-gray-500 mt-10">Group or user data is not available.</div>;
-  }
 
    const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
   // If no group data is passed, don't render anything.

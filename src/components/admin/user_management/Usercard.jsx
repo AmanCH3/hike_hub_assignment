@@ -1,5 +1,3 @@
-// src/components/admin/user_management/UserCard.jsx
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -12,97 +10,256 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-// 1. Import new icons we'll use
 import { 
-    MoreVertical, Eye, Edit, Trash2, AtSign, CalendarDays, CheckCircle, XCircle 
+  MoreVertical, 
+  Eye, 
+  Edit, 
+  Trash2, 
+  Mail, 
+  Calendar, 
+  CheckCircle, 
+  XCircle,
+  Clock,
+  Mountain,
+  Shield,
+  User,
+  Crown,
+  Activity
 } from 'lucide-react';
 
-// A small helper component to keep our code clean
-const InfoItem = ({ icon: Icon, text }) => (
-    <div className="flex items-center text-sm text-muted-foreground">
-        <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
-        <span>{text}</span>
+// Enhanced InfoItem component with better styling
+const InfoItem = ({ icon: Icon, text, subtext, variant = "default" }) => (
+  <div className="flex items-center gap-2 text-sm">
+    <div className={`p-1.5 rounded-lg ${
+      variant === "success" ? "bg-green-50 text-green-600" :
+      variant === "danger" ? "bg-red-50 text-red-600" :
+      variant === "warning" ? "bg-yellow-50 text-yellow-600" :
+      "bg-gray-50 text-gray-600"
+    }`}>
+      <Icon className="h-3.5 w-3.5" />
     </div>
+    <div className="flex-1 min-w-0">
+      <span className="text-gray-900 font-medium">{text}</span>
+      {subtext && <div className="text-xs text-gray-500">{subtext}</div>}
+    </div>
+  </div>
 );
 
+// Status indicator component
+const StatusIndicator = ({ status }) => {
+  const statusConfig = {
+    Active: {
+      icon: CheckCircle,
+      className: "bg-green-50 text-green-700 border-green-200",
+      dotColor: "bg-green-500"
+    },
+    Inactive: {
+      icon: Clock,
+      className: "bg-gray-50 text-gray-700 border-gray-200",
+      dotColor: "bg-gray-400"
+    },
+    Suspended: {
+      icon: XCircle,
+      className: "bg-red-50 text-red-700 border-red-200",
+      dotColor: "bg-red-500"
+    }
+  };
+
+  const config = statusConfig[status] || statusConfig.Inactive;
+  const Icon = config.icon;
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-2 h-2 rounded-full ${config.dotColor}`}></div>
+      <Badge variant="outline" className={`${config.className} font-medium`}>
+        <Icon className="mr-1 h-3 w-3" />
+        {status || 'Unknown'}
+      </Badge>
+    </div>
+  );
+};
 
 export function UserCard({ user, onView, onEdit, onDelete }) {
   
-  // 2. Define styles based on role for easy maintenance
-  const roleStyles = {
-    Guide: 'border-t-4 border-blue-500',
-    User: 'border-t-4 border-gray-300',
-    Admin: 'border-t-4 border-purple-500',
+  const roleConfig = {
+    Admin: {
+      icon: Crown,
+      className: "bg-purple-50 text-purple-700 border-purple-200",
+      cardBorder: "border-l-4 border-l-purple-500",
+      bgGradient: "bg-gradient-to-br from-purple-50/50 to-indigo-50/30"
+    },
+    Guide: {
+      icon: Mountain,
+      className: "bg-blue-50 text-blue-700 border-blue-200",
+      cardBorder: "border-l-4 border-l-blue-500",
+      bgGradient: "bg-gradient-to-br from-blue-50/50 to-cyan-50/30"
+    },
+    User: {
+      icon: User,
+      className: "bg-gray-50 text-gray-700 border-gray-200",
+      cardBorder: "border-l-4 border-l-gray-400",
+      bgGradient: "bg-gradient-to-br from-gray-50/50 to-slate-50/30"
+    }
   };
 
+  const config = roleConfig[user.role] || roleConfig.User;
+  const RoleIcon = config.icon;
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Unknown";
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return "Invalid date";
+    }
+  };
+
+  // const getLastActive = () => {
+  //   if (!user.lastActive) return "Never";
+  //   const now = new Date();
+  //   const lastActive = new Date(user.lastActive);
+  //   const diffInHours = Math.floor((now - lastActive) / (1000 * 60 * 60));
+    
+  //   if (diffInHours < 1) return "Just now";
+  //   if (diffInHours < 24) return `${diffInHours}h ago`;
+  //   if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
+  //   return formatDate(user.lastActive);
+  // };
+
   return (
-    // 3. Add transition and hover effects for interactivity
-    <Card 
-        className={`transition-all duration-200 ease-in-out hover:shadow-lg hover:scale-[1.02] ${roleStyles[user.role] || 'border-t-4 border-gray-200'}`}
-    >
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
-        <div className="flex items-center space-x-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.name} />
-              <AvatarFallback className="text-xl">
-                {(user.name || '')
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-                 <CardTitle className="text-lg font-medium">{user.name}</CardTitle>
-                 <Badge variant={user.role === 'Guide' ? 'default' : 'secondary'} className="mt-1">
-                    {user.role}
-                 </Badge>
+    <Card className={`
+      group relative overflow-hidden transition-all duration-300 ease-out
+      hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]
+      ${config.cardBorder}
+      border-0 shadow-sm bg-white
+    `}>
+      {/* Subtle background gradient */}
+      <div className={`absolute inset-0 ${config.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+      
+      {/* Animated border glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      
+      <CardHeader className="relative pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <div className="relative">
+              <Avatar className="h-14 w-14 ring-2 ring-white shadow-md group-hover:ring-4 transition-all duration-300">
+                <AvatarImage 
+                  src={user.avatar || '/placeholder.svg'} 
+                  alt={user.name}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700">
+                  {(user.name || '')
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {/* Activity indicator */}
+              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm ${
+                user.status === 'Active' ? 'bg-green-500' : 'bg-gray-400'
+              }`}></div>
             </div>
+            
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-xl font-bold text-gray-900 mb-2 group-hover:text-gray-800 transition-colors">
+                {user.name || 'Unknown User'}
+              </CardTitle>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className={`${config.className} font-medium`}>
+                  <RoleIcon className="mr-1 h-3 w-3" />
+                  {user.role || 'User'}
+                </Badge>
+                <StatusIndicator status={user.status} />
+              </div>
+            </div>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-100"
+              >
+                <span className="sr-only">Open menu</span>
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={onView} className="cursor-pointer">
+                <Eye className="mr-2 h-4 w-4 text-blue-500" />
+                <span>View Details</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+                <Edit className="mr-2 h-4 w-4 text-green-500" />
+                <span>Edit User</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={onDelete} 
+                className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Delete User</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onView}>
-              <Eye className="mr-2 h-4 w-4" />
-              <span>View Details</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onEdit}>
-              <Edit className="mr-2 h-4 w-4" />
-              <span>Edit User</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onDelete} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Delete User</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {/* 4. Use our InfoItem helper for cleaner code */}
-        <InfoItem icon={AtSign} text={user.email} />
-        <InfoItem 
-            icon={CalendarDays} 
-            text={`Joined on ${new Date(user.createdAt).toLocaleDateString()}`} 
-        />
-        
-        {/* 5. Improved status badge with an icon for clarity */}
-        {/* {user.status === 'Active' ? (
-            <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Active
-            </Badge>
-        ) : (
-            <Badge variant="destructive">
-                <XCircle className="mr-2 h-4 w-4" />
-                Suspended
-            </Badge>
-        )} */}
+
+      <CardContent className="relative space-y-4 pt-0">
+        <div className="space-y-3">
+          <InfoItem 
+            icon={Mail} 
+            text={user.email || 'No email provided'} 
+          
+          />
+          
+          <InfoItem 
+            icon={Calendar} 
+            text={formatDate(user.createdAt || user.joinDate)}
+            subtext="Member since"
+            variant="default"
+          />
+          
+          {/* <InfoItem 
+            icon={Activity} 
+            text={getLastActive()}
+            subtext="Last seen"
+            variant={user.status === 'Active' ? 'success' : 'default'}
+          /> */}
+        </div>
       </CardContent>
+
+      {/* Stats Footer */}
+      {(user.hikesCompleted !== undefined || user.totalBookings !== undefined) && (
+        <CardFooter className="relative pt-4 border-t bg-gray-50/50">
+          <div className="flex items-center justify-between w-full text-sm">
+            {user.hikesCompleted !== undefined && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Mountain className="h-4 w-4" />
+                <span className="font-medium">{user.hikesCompleted || 0}</span>
+                <span>hikes completed</span>
+              </div>
+            )}
+            
+            {user.totalBookings !== undefined && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <span className="font-medium">{user.totalBookings || 0}</span>
+                <span>total bookings</span>
+              </div>
+            )}
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 }

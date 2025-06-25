@@ -35,7 +35,7 @@ export default function AppRouter() {
 
         {/* Admin Routes with AdminLayout, protected by ProtectedRoute */}
         <Route
-          path="/admin"
+          path="/admin/"
           element={
             <ProtectedRoute adminOnly={true}>
               <SidebarProvider>

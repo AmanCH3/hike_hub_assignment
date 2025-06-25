@@ -233,7 +233,7 @@ export default function Navbar() {
                   <Link
                     to="/admin/dashboard"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-3 py-3 px-4 bg-yellow-200 text-white rounded-lg hover:bg-green-600 transition-colors"
                   >
                     <FaTachometerAlt />
                     Dashboard
