@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useRequestToJoinGroup , useApproveJoinRequest , useDenyJoinRequest } from "../../hooks/useGroup";
 import { JoinGroupDialog } from "./join_group_dailog";
+import { GroupChat } from "./group_chat";
 
 
 
@@ -49,6 +50,10 @@ const getDifficultyBadgeColor = (difficulty) => {
 
 // NOTE: The component now receives `group` and `user` as props
 export function GroupDetails({ group, user }) {
+
+  if (!group || !user) { // Also check for user
+    return <div className="text-center text-gray-500 mt-10">Group or user data is not available.</div>;
+  }
 
    const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
   // If no group data is passed, don't render anything.
@@ -105,14 +110,18 @@ export function GroupDetails({ group, user }) {
   const handleApprove = (requestId) => approveMutation.mutate({ groupId, requestId });
   const handleDeny = (requestId) => denyMutation.mutate({groupId, requestId });
 
+   const canViewChat = isCurrentUserLeader || isCurrentUserConfirmedParticipant;
+
   return (
     <>
      <JoinGroupDialog
         open={isJoinDialogOpen}
         setOpen={setJoinDialogOpen}
         groupTitle={group.title}
-        onJoin={handleSendJoinRequest} 
+        onJoin={handleSendJoinRequest} // Pass the new handler
       />
+
+     
 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6 max-h-[90vh] overflow-y-auto">
       <div className="lg:col-span-2 space-y-8">
@@ -142,6 +151,14 @@ export function GroupDetails({ group, user }) {
             )}
           </CardContent>
         </Card>
+         {canViewChat && (
+            <Card>
+              <CardHeader><CardTitle className="text-xl">Group Chat</CardTitle></CardHeader>
+              <CardContent>
+                <GroupChat groupId={groupId} currentUser={user} />
+              </CardContent>
+            </Card>
+          )}
 
         <Card>
           <CardHeader><CardTitle className="text-xl">Trail Information</CardTitle></CardHeader>

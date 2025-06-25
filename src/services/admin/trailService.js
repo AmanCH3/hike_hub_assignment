@@ -1,57 +1,57 @@
-import { getAllTrailApi , getOneApiTrailApi , createOneTrailApi , deleteOneTrailApi , updateOneTrailApi } from "../../api/admin/trailApi";
+    import { getAllTrailApi , getOneApiTrailApi , createOneTrailApi , deleteOneTrailApi , updateOneTrailApi } from "../../api/admin/trailApi";
 
-export const getAllTrailService = async () => {
-    try  {
-        const response = await getAllTrailApi() 
-        return response.data
-    }
-    catch(err){
-        throw err.response?.data || {messasge : "Failed to fetch Trail"}
-    }
-
-}
-
-export const createOneTrailService = async (data) => {
-    try {
-        const response = await createOneTrailApi(data) 
-        return response.data
-    }
-    catch(err){
-        throw err.response?.data || {message : "failed to create"}
-    }
-}
-
-
-export const getOneTrailService = async (id) => {
-    try {
-        const response = await getOneApiTrailApi(id) 
-        return response.data
+    export const getAllTrailService = async () => {
+        try  {
+            const response = await getAllTrailApi() 
+            return response.data
+        }
+        catch(err){
+            throw err.response?.data || {messasge : "Failed to fetch Trail"}
+        }
 
     }
-    catch(err){
-        throw err.response?.data || {message : "Failed to load"}
+
+    export const createOneTrailService = async (data) => {
+        try {
+            const response = await createOneTrailApi(data) 
+            return response.data
+        }
+        catch(err){
+            throw err.response?.data || {message : "failed to create"}
+        }
     }
-}
 
 
-export const updateOneTrailService = async (id , data) => {
-    try {
-        const response = await updateOneTrailApi(id , data) 
-        return response.data
+    export const getOneTrailService = async (id) => {
+        try {
+            const response = await getOneApiTrailApi(id) 
+            return response.data
 
+        }
+        catch(err){
+            throw err.response?.data || {message : "Failed to load"}
+        }
     }
-    catch(err){
-        throw err.response?.data || {message : "failed to updated"}
-    }
-}
 
-export const deleteOneTrailService = async(id) => {
-    try {
-        const response = await deleteOneTrailApi(id)
-        return response.data 
 
+    export const updateOneTrailService = async (id , data) => {
+        try {
+            const response = await updateOneTrailApi(id , data) 
+            return response.data
+
+        }
+        catch(err){
+            throw err.response?.data || {message : "failed to updated"}
+        }
     }
-    catch(err){
-        throw err.response?.data || {message : "failed to delete"}
+
+    export const deleteOneTrailService = async(id) => {
+        try {
+            const response = await deleteOneTrailApi(id)
+            return response.data 
+
+        }
+        catch(err){
+            throw err.response?.data || {message : "failed to delete"}
+        }
     }
-}

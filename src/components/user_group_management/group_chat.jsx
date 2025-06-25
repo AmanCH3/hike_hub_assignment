@@ -1,128 +1,96 @@
-// // src/components/GroupCard.jsx
-// import {
-//   Card,
-//   CardContent,
-//   CardFooter,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { Badge } from "@/components/ui/badge";
-// import { Button } from "@/components/ui/button";
-// import {
-//   CalendarDays,
-//   MapPin,
-//   Clock,
-//   Mountain,
-//   TrendingUp, // For elevation gain
-//   Route,       // For distance
-// } from "lucide-react";
-// import { useNavigate } from 'react-router-dom'; // <--- Import useNavigate
+// src/components/chat/GroupChat.jsx
+"use client"
 
-// // A utility to format the duration (keeping your original logic)
-// const formatDuration = (duration) => {
-//   if (!duration) return 'N/A';
-//   if (typeof duration === 'object' && duration.min !== undefined && duration.max !== undefined) {
-//       if (duration.min === duration.max) return `${duration.max} hours`;
-//       return `${duration.min}-${duration.max} hours`;
-//   }
-//   return duration; // Fallback if it's already a string
-// };
+import React, { useState, useEffect, useRef } from 'react';
+import { useMessages } from '../../hooks/useMessage'
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Send, Loader2 } from 'lucide-react'; // Added Loader2 for loading state
 
-// export function GroupCard({ group }) {
-//   // console.log(group); // Removed for cleaner console output
-//   const navigate = useNavigate(); // <--- Initialize useNavigate hook
+export function GroupChat({ groupId, currentUser, authToken }) {
+  // All complex logic is now in the custom hook
+  const { messages, isLoading, error, sendMessage } = useMessages(groupId, authToken);
+  
+  // State for the controlled input component remains here
+  const [newMessageText, setNewMessageText] = useState('');
+  const messagesEndRef = useRef(null);
 
-//   const spotsFilled = group.participants?.length || 0;
-//   const spotsTotal = group.maxSize || 0;
+  // Effect to automatically scroll to the newest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-//   // <--- Handler to navigate to GroupDetails page
-//   const handleViewDetails = () => {
-//     navigate(`/group/${group._id}`); // Navigate to the specific group's detail page
-//   };
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    // Call the function provided by the hook
+    sendMessage(newMessageText, currentUser._id);
+    setNewMessageText(''); // Clear the input field
+  };
 
-//   return (
-//     <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-lg">
-//       <CardHeader>
-//         <div className="flex justify-between items-start gap-4">
-//           <CardTitle className="text-xl font-bold">{group.title}</CardTitle>
-//           <Badge className="whitespace-nowrap">
-//             {spotsFilled}/{spotsTotal} Spots
-//           </Badge>
-//         </div>
-//         <div className="flex items-center text-sm text-muted-foreground pt-1">
-//           <MapPin className="h-4 w-4 mr-2" />
-//           <span>{group.trail?.name}</span>
-//         </div>
-//         <div className="flex items-center text-sm text-muted-foreground">
-//            <CalendarDays className="h-4 w-4 mr-2" />
-//            <span>
-//              {new Date(group.date).toLocaleDateString('en-US', {
-//                  month: 'long',
-//                  day: 'numeric',
-//                  year: 'numeric',
-//              })}
-//            </span>
-//         </div>
-//       </CardHeader>
+  // Render a loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[500px]">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        <p className="ml-2">Loading Chat...</p>
+      </div>
+    );
+  }
 
-//       <CardContent className="flex-grow space-y-4">
-//         {/* Group Leader */}
-//         <div>
-//           <p className="text-sm font-medium mb-2">Group Leader</p>
-//           <div className="flex items-center gap-3">
-//             <Avatar className="h-10 w-10">
-//               <AvatarImage src={group.leader?.profilePicture} alt={group.leader?.name} />
-//               <AvatarFallback>{group.leader?.name?.charAt(0) || 'U'}</AvatarFallback>
-//             </Avatar>
-//             <span className="font-semibold">{group.leader?.name || 'Unknown'}</span>
-//           </div>
-//         </div>
+  // Render an error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[500px] text-red-500">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
-//         {/* Participants */}
-//         <div>
-//           <p className="text-sm font-medium mb-2">Participants</p>
-//           <div className="flex items-center">
-//               {/* Display first 3-4 avatars */}
-//             {group.participants.slice(0, 4).map((p, i) => (
-//               <Avatar key={p._id || i} className="h-8 w-8 border-2 border-background -ml-2 first:ml-0">
-//                 <AvatarImage src={p.profilePicture} alt={p.name}/>
-//                 {/* <AvatarFallback>{p.name.charAt(0).toUpperCase()}</AvatarFallback> */}
-//               </Avatar>
-//             ))}
-//             {/* Show a counter for the rest */}
-//             {group.participants.length > 4 && (
-//               <div className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-xs font-semibold border-2 border-background -ml-2">
-//                 +{group.participants.length - 4}
-//               </div>
-//             )}
-//             <span className="text-sm text-muted-foreground ml-3">{spotsFilled} hikers</span>
-//           </div>
-//         </div>
-
-//         {/* Trail Details */}
-//         <div>
-//           <p className="text-sm font-medium mb-2">Trail Details</p>
-//           <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-muted-foreground">
-//             <div className="flex items-center gap-2"><Mountain className="h-5 w-5 text-primary" /><span>{group.difficulty}</span></div>
-//             <div className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-primary" /><span>{group.trail?.elevation} m</span></div>
-//             <div className="flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /><span>{formatDuration(group.trail?.duration)}</span></div>
-//             <div className="flex items-center gap-2"><Route className="h-5 w-5 text-primary" /><span>{group.trail?.distance} km</span></div>
-//           </div>
-//         </div>
-
-//         {/* Description */}
-//           <div>
-//             <p className="text-sm font-medium mb-1">Description</p>
-//             <p className="text-sm text-muted-foreground line-clamp-3">{group.description}</p>
-//         </div>
-
-//       </CardContent>
-//       <CardFooter>
-//         <Button onClick={handleViewDetails} className="w-full bg-green-600 hover:bg-green-700">
-//           View Details
-//         </Button>
-//       </CardFooter>
-//     </Card>
-//   );
-// }
+  return (
+    <div className="flex flex-col h-[500px] bg-white rounded-lg p-4 border">
+      {/* Messages Display Area */}
+      <div className="flex-grow overflow-y-auto mb-4 pr-2 space-y-4">
+        {messages.map((msg) => (
+          <div 
+            key={msg._id} 
+            className={`flex items-start gap-3 ${msg.sender._id === currentUser._id ? 'justify-end' : ''}`}
+          >
+            {msg.sender._id !== currentUser._id && (
+              <Avatar className="h-9 w-9">
+                <AvatarImage src={msg.sender?.profileImage} alt={msg.sender?.name} />
+                <AvatarFallback>{msg.sender?.name?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
+            )}
+            <div className={`flex flex-col ${msg.sender._id === currentUser._id ? 'items-end' : 'items-start'}`}>
+              <p className="font-semibold text-sm text-gray-700 px-1">{msg.sender.name}</p>
+              <div 
+                className={`p-3 rounded-lg max-w-sm break-words text-sm
+                  ${msg.sender._id === currentUser._id 
+                    ? 'bg-green-600 text-white' 
+                    : 'bg-gray-100 text-gray-800'}`
+                }
+              >
+                {msg.text}
+              </div>
+            </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      
+      {/* Message Input Form */}
+      <form onSubmit={handleSendMessage} className="flex gap-2 border-t pt-4">
+        <Input
+          value={newMessageText}
+          onChange={(e) => setNewMessageText(e.target.value)}
+          placeholder="Type your message..."
+          autoComplete="off"
+        />
+        <Button type="submit" size="icon" className="bg-green-600 hover:bg-green-700">
+          <Send className="h-5 w-5"/>
+        </Button>
+      </form>
+    </div>
+  );
+}

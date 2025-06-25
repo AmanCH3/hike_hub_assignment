@@ -17,6 +17,7 @@ import GroupsPage from "../pages/GroupPage";
 import ProtectedRoute from "../components/protectedRoutes";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { GroupDetails } from "../components/user_group_management/group_detail";
+import HikeHub404 from "../pages/HikeHub404";
 
 export default function AppRouter() {
   return (
@@ -51,6 +52,7 @@ export default function AppRouter() {
           <Route path="trail" element={<TrailManagementPage />} />
            <Route path="groups/:groupId" element={<GroupDetails/>} />
         </Route>
+        <Route path="*" element={<HikeHub404 />} />
       </Routes>
     </BrowserRouter>
   );

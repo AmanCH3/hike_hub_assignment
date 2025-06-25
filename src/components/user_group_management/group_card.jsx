@@ -29,7 +29,7 @@ const formatDuration = (duration) => {
   return `${duration} hours`;
 };
 
-export function GroupCard({ group, onView  }) {
+export function GroupCard({ group, onView , onCreate }) {
   const navigate = useNavigate();
   // Ensure spotsFilled counts only confirmed participants if that's the intent
   // Otherwise, group.participants?.length counts all participants (pending, confirmed, declined)
