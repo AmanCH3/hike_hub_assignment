@@ -24,6 +24,8 @@ import { useAuth } from "../../auth/authProvider"
 export function GroupHikeManagement() {
   const {user , isAuthenticated} = useAuth() ;
   const [searchTerm, setSearchTerm] = useState("")
+  const [page, setPage] = useState(1);
+  const [filter , setFilters] = useState({status : "all" , difficulty : "all"}) ;
   const [statusFilter, setStatusFilter] = useState("all")
   const [difficultyFilter, setDifficultyFilter] = useState("all")
   const [selectedHikeId, setSelectedHikeId] = useState(null)
@@ -48,72 +50,15 @@ export function GroupHikeManagement() {
     data : groupsData,
     isLoading: isGroupsLoading,
     error: groupsError,
-    setPage,
-    setSearch,
-  } = useGroup(1, 10, searchTerm)
+   
+  } = useGroup(1, 10, searchTerm , filter)
 
    const groups = groupsData?.data || [];
   const pagination = groupsData?.pagination;
-  const createGroupMutation = useCreateGroup()
-  const updateGroupMutation = useUpdateOneGroup()
-  const deleteGroupMutation = useDeleteOneGroup()
-  const { group: selectedHikeDetails } = useGetOneGroup(selectedHikeId)
 
- 
+  const { group: selectedHikeDetails , isLoading : isDetailsLoading } = useGetOneGroup(selectedHikeId)
 
 
-
-  const handleCreateHike = () => {
-    const newGroupData = {
-      title: formData.title,
-      trail: formData.trail,
-      date: formData.date,
-      description: formData.description,
-      maxSize: formData.maxSize,
-      leader: formData.leader,
-      status: "upcoming",
-      meetingPoint: { description: formData.meetingPoint },
-      requirements: formData.requirements ? [formData.requirements] : [],
-      difficulty: formData.difficulty,
-    }
-
-    createGroupMutation.mutate(newGroupData, {
-      onSuccess: () => {
-        setIsCreateDialogOpen(false)
-        setFormData({
-          title: "", trail: "", date: "", maxSize: 10, leader: "", difficulty: "Easy", description: "", requirements: "", meetingPoint: "",
-        })
-      },
-    })
-  }
-
-  const handleUpdateHike = () => {
-    if (!selectedHikeId) return
-    const updatedGroupData = {
-      title: formData.title,
-      trail: formData.trail,
-      date: formData.date,
-      description: formData.description,
-      maxSize: formData.maxSize,
-      leader: formData.leader,
-      meetingPoint: { description: formData.meetingPoint },
-      requirements: formData.requirements ? [formData.requirements] : [],
-      difficulty: formData.difficulty,
-    }
-    updateGroupMutation.mutate({ id: selectedHikeId, data: updatedGroupData }, {
-      onSuccess: () => setIsEditDialogOpen(false),
-    })
-  }
-
-  const handleDeleteHike = () => {
-    if (!selectedHikeId) return
-    deleteGroupMutation.mutate(selectedHikeId, {
-      onSuccess: () => {
-        setIsDeleteDialogOpen(false)
-        setSelectedHikeId(null)
-      },
-    })
-  }
 
   const handleManageParticipants = (group) => {
     setSelectedGroup(group);
@@ -139,7 +84,8 @@ export function GroupHikeManagement() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             {/* The CreateGroupForm is now rendered inside the dialog content */}
-            <CreateGroupFormAdmin user = {user}
+            <CreateGroupFormAdmin 
+              user = {user}
               onSuccess={() => setIsCreateDialogOpen(false)} 
             />
           </DialogContent>
@@ -211,13 +157,9 @@ export function GroupHikeManagement() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Group Hike Details</DialogTitle>
-            <DialogDescription>Complete information about the selected hike</DialogDescription>
           </DialogHeader>
-          {selectedHikeDetails ? (
-            <GroupDetails group={selectedHikeDetails} />
-          ) : (
-            selectedHikeId && <p>Loading details...</p>
-          )}
+          {isDetailsLoading && <p>Loading details...</p>}
+          {selectedHikeDetails && <GroupDetails group={selectedHikeDetails} />}
         </DialogContent>
       </Dialog>
 
@@ -225,20 +167,20 @@ export function GroupHikeManagement() {
       <GroupEditDialog
         isOpen={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-        formData={formData}
-        setFormData={setFormData}
-        handleUpdateHike={handleUpdateHike}
-        isUpdating={updateGroupMutation.isPending}
-        selectedHikeDetails={selectedHikeDetails}
+        hikeId= {selectedHikeId}
+        
       />
 
       {/* Delete Dialog */}
       <GroupDeleteAlertDialog
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
-        handleDeleteHike={handleDeleteHike}
-        isDeleting={deleteGroupMutation.isPending}
-        selectedHikeDetails={selectedHikeDetails}
+        hikeId = {selectedHikeId}
+        hikeTitle = {selectedHikeDetails?.title}
+        onSuccess = {() => {
+          setIsDeleteDialogOpen(false) ,
+          setSelectedHikeId(null)
+        }}
       />
     </div>
   )

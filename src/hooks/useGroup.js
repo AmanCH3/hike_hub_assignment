@@ -2,6 +2,7 @@ import { useQuery , useMutation , useQueryClient } from "@tanstack/react-query";
 import { createOneGroupService , updateOneGroupService, getAllGroupService , getOneGroupService , deleteOneGroupService , joinOneGroupService, denyJoinRequestService, approveJoinRequestService, requestToJoinGroupService, getAllPendingRequestsService } from "../services/groupService";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import { data } from "autoprefixer";
 
 
 
@@ -36,11 +37,16 @@ export const useCreateGroup = () => {
         {
             mutationKey : ['create_group'],
             mutationFn : createOneGroupService,
-            onSuccess : () => {
+            onSuccess : (data) => {
+                toast.success(data?.message || "Group Created Succesfully")
                 queryClient 
-                .invalidateQueries (
-                    'group'
+                .invalidateQueries ({
+                    queryKey : ['group']
+                }
                 )
+            },
+            onError : (err) => {
+                toast.error(err.message || "Failed to create group") ;
             }
         }
     )
@@ -92,11 +98,8 @@ export const useUpdateOneGroup = () => {
             mutationKey : ["group_update"] ,
             onSuccess : () => {
                 toast.success("Group updated successfully!")
-                queryClient.invalidateQueries(
-                    [
-                        "group" , "group_detail"
-                    ]
-                )
+                queryClient.invalidateQueries({ queryKey: ['group'] });
+                 queryClient.invalidateQueries({ queryKey: ['group_detail', variables.id] });
             } ,
             onError : (err) => {
                 toast.error(err.message || "Group update failed")

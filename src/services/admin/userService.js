@@ -2,10 +2,10 @@ import { data } from "autoprefixer";
 import { getAllTrailApi } from "../../api/admin/trailApi";
 import { getUserApi , updateUserApi  , deleteUserApi , getOneUserApi } from "../../api/admin/userApi";
 import { registerUserApi } from "../../api/authApi";
-export const getAllUserService = async () => {
+export const getAllUserService = async ({page, limit , search}) => {
     try {
-        const response = await getUserApi()
-        return response.data
+        const response = await getUserApi({page , limit , search})
+        return response.data ;
 
     }
     catch (err){
