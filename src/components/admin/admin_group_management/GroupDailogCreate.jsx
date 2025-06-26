@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card ,CardHeader , CardTitle , CardDescription, CardContent} from "@/components/ui/card"
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import {
   Popover,
   PopoverContent,
@@ -26,181 +28,161 @@ import { useAdminTrail } from "../../../hooks/admin/useAdminTrail"
 import { useAdminUser } from "../../../hooks/admin/userAdminUser"
 import { toast } from "react-toastify"
 
-
+const FormError = ({ children }) => <p className="text-red-500 text-xs mt-1">{children}</p>;
+const validationSchema = Yup.object({
+  title: Yup.string().required("Group title is required"),
+  trail: Yup.string().required("Please select a trail"),
+  leader: Yup.string().required("Please select a leader"),
+  date: Yup.date().required("A date is required").min(new Date(), "Date cannot be in the past"),
+  description: Yup.string(),
+  maxSize: Yup.number().required("Max size is required").min(2, "Group size must be at least 2"),
+  difficulty: Yup.string().required("Difficulty is required"),
+  meetingPoint: Yup.string().required("Meeting point is required"),
+  requirements: Yup.array().of(Yup.string()),
+  // Validate the array of files
+  photos: Yup.array().max(5, "You can upload a maximum of 5 images"),
+});
 
 export function CreateGroupFormAdmin({ user, onSuccess }) {
-  const navigate = useNavigate();
   const { mutate: createGroup, isPending: isLoading } = useCreateGroup();
-  const { trails: availableTrails = [] } = useAdminTrail(); // Default to empty array
-  const {users : leader = []} = useAdminUser() ;
+  const { trails: availableTrails = [] } = useAdminTrail();
+  const { users: availableLeaders = [] } = useAdminUser();
 
-  const [date, setDate] = useState();
-  const [requirements, setRequirements] = useState([]);
+  // State for UI elements that are not part of Formik's core data
   const [newRequirement, setNewRequirement] = useState("");
-  const [imagePreview, setImagePreviews] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    maxSize: 6,
-    meetingPoint: "",
-    difficulty: "moderate", 
-    leader : "",
-    trail: "",
-   
+  // --- 2. Initialize Formik ---
+  const formik = useFormik({
+    // Set initial values for all form fields
+    initialValues: {
+      title: "",
+      trail: "",
+      leader: "",
+      date: null,
+      description: "",
+      maxSize: 6,
+      difficulty: "moderate",
+      meetingPoint: "",
+      requirements: [],
+      photos: [], 
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values) => {
+      if (!user?._id) {
+        toast.error("Authentication error. Please log in again.");
+        return;
+      }
+      
+      const submissionData = new FormData();
+      
+      // Append form values to FormData
+      submissionData.append("title", values.title);
+      submissionData.append("description", values.description);
+      submissionData.append("maxSize", values.maxSize);
+      submissionData.append("meetingPoint", values.meetingPoint);
+      submissionData.append("trail", values.trail);
+      submissionData.append("date", values.date.toISOString());
+      submissionData.append("difficulty", values.difficulty);
+      submissionData.append("leader", values.leader);
+      submissionData.append("status", "upcoming");
+
+      // Append arrays correctly
+      values.photos.forEach(file => {
+        submissionData.append("photo", file); // API expects 'photo'
+      });
+
+      values.requirements.forEach(req => {
+        submissionData.append("requirements[]", req);
+      });
+
+      createGroup(submissionData, {
+        onSuccess: () => {
+          // Clean up previews and call parent's onSuccess function
+          imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
+          if (onSuccess) onSuccess(); 
+        },
+      });
+    },
   });
 
-   useEffect(() => {
-    return () => {
-      imagePreview.forEach(file => URL.revokeObjectURL(file.preview));
-    };
-  }, [imagePreview]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-const handleImageChange = (e) => {
+  // --- 3. Custom Handlers that interact with Formik state ---
+  const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const MAX_FILES = 5;
+    // Combine with existing files and set in Formik
+    const allFiles = [...formik.values.photos, ...files];
+    formik.setFieldValue("photos", allFiles);
 
-    if (imageFiles.length + files.length > MAX_FILES) {
-        toast.error(`You can only upload a maximum of ${MAX_FILES} images.`);
-        return;
-    }
-
-    const validFiles = files.filter(file => {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`File ${file.name} is too large (Max 5MB).`);
-        return false;
-      }
-      return true;
-    });
-
-    setImageFiles((prevFiles) => [...prevFiles, ...validFiles]);
-
-    const newPreviews = validFiles.map(file => URL.createObjectURL(file));
-    setImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
+    // Update UI previews
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...newPreviews]);
   };
-
+  
   const handleRemoveImage = (indexToRemove) => {
-    URL.revokeObjectURL(imagePreview[indexToRemove]);
-    setImageFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
-    setImagePreviews((prev) => prev.filter((_, index) => index !== indexToRemove));
+    URL.revokeObjectURL(imagePreviews[indexToRemove]);
+    formik.setFieldValue("photos", formik.values.photos.filter((_, i) => i !== indexToRemove));
+    setImagePreviews(prev => prev.filter((_, i) => i !== indexToRemove));
   };
-
+  
   const addRequirement = () => {
     const trimmed = newRequirement.trim();
-    if (trimmed && !requirements.includes(trimmed)) {
-      setRequirements([...requirements, trimmed]);
+    if (trimmed && !formik.values.requirements.includes(trimmed)) {
+      formik.setFieldValue("requirements", [...formik.values.requirements, trimmed]);
       setNewRequirement("");
     }
   };
 
-  const removeRequirement = (req) => {
-    setRequirements(requirements.filter((r) => r !== req));
+  const removeRequirement = (reqToRemove) => {
+    formik.setFieldValue("requirements", formik.values.requirements.filter(r => r !== reqToRemove));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!user?._id) {
-      toast.error("You must be logged in to create a group.");
-      return;
-    }
-    if (!formData.trail || !date) {
-      toast.error("Please select a trail and a date for the hike.");
-      return;
-    }
-
-    const submissionData = new FormData();
-
-    // Append all required fields
-    submissionData.append("title", formData.title);
-    submissionData.append("description", formData.description);
-    submissionData.append("maxSize", formData.maxSize);
-    submissionData.append("meetingPoint", formData.meetingPoint);
-    submissionData.append("trail", formData.trail);
-    submissionData.append("date", date.toISOString());
-    submissionData.append("difficulty", formData.difficulty); 
-    submissionData.append("leader", user._id); 
-    submissionData.append("status", "upcoming"); 
-
-    imageFiles.forEach((file) => {
-      submissionData.append("photo", file);
-    }); 
-
-   
-    requirements.forEach((req) => submissionData.append("requirements[]", req));
-    console.log(submissionData)
-
-    createGroup(submissionData, {
-      onSuccess: () => {
-        toast.success("Group created successfully!")
-        imagePreview.forEach(preview => URL.revokeObjectURL(preview));
-      },
-      onError: (error) => {
-        const errorMessage = error.response?.data?.message || "Failed to create group.";
-        toast.error(errorMessage);
-        console.error("Group creation error:", error);
-      },
-    });
-  };
 
   return (
-    <form onSubmit={handleSubmit}>
+    // Use formik.handleSubmit for the form's onSubmit event
+    <form onSubmit={formik.handleSubmit}>
       <Card className="border-none">
         <CardHeader>
-          <CardTitle>Create a New Hiking Group (Admin)</CardTitle>
-          <CardDescription>Fill in the details below to schedule a new group hike.</CardDescription>
+          <CardTitle>Create a New Hiking Group</CardTitle>
+          <CardDescription>Fill in the details to schedule a new hike.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
+          {/* --- 4. Connect UI Inputs to Formik --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Column 1 */}
             <div className="space-y-6">
               <div>
                 <Label htmlFor="title">Group Title</Label>
-                <Input id="title" name="title" value={formData.title} onChange={handleInputChange} placeholder="e.g., Sunrise Hike to Nagarkot" required />
+                {/* getFieldProps connects value, onChange, onBlur, and name */}
+                <Input id="title" {...formik.getFieldProps('title')} placeholder="e.g., Sunrise Hike to Nagarkot" />
+                {formik.touched.title && formik.errors.title && <FormError>{formik.errors.title}</FormError>}
               </div>
+
               <div>
                 <Label htmlFor="trail">Trail</Label>
-                <Select name="trail" onValueChange={(value) => handleSelectChange('trail', value)} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a trail" />
-                  </SelectTrigger>
+                {/* For custom components like Select, wire them up manually */}
+                <Select name="trail" onValueChange={value => formik.setFieldValue('trail', value)} onOpenChange={() => formik.setFieldTouched('trail', true)}>
+                  <SelectTrigger><SelectValue placeholder="Choose a trail" /></SelectTrigger>
                   <SelectContent>
-                    {availableTrails.map((trail) => (
-                      <SelectItem key={trail._id} value={trail._id}>
-                        {trail.name} - <span className="text-muted-foreground">{trail.location}</span>
-                      </SelectItem>
-                    ))}
+                    {availableTrails.map(trail => <SelectItem key={trail._id} value={trail._id}>{trail.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                {formik.touched.trail && formik.errors.trail && <FormError>{formik.errors.trail}</FormError>}
               </div>
-                           <div>
-                <Label htmlFor="user">Leader</Label>
-                <Select name="user" onValueChange={(value) => handleSelectChange('user', value)} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a leader" />
-                  </SelectTrigger>
+              
+              <div>
+                <Label htmlFor="leader">Leader</Label>
+                <Select name="leader" onValueChange={value => formik.setFieldValue('leader', value)} onOpenChange={() => formik.setFieldTouched('leader', true)}>
+                  <SelectTrigger><SelectValue placeholder="Choose a leader" /></SelectTrigger>
                   <SelectContent>
-                    {leader.map((user) => (
-                      <SelectItem key={user._id} value={user._id}>
-                        {user.name}
-                      </SelectItem>
-                    ))}
+                    {availableLeaders.map(leader => <SelectItem key={leader._id} value={leader._id}>{leader.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                {formik.touched.leader && formik.errors.leader && <FormError>{formik.errors.leader}</FormError>}
               </div>
+
               <div>
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} placeholder="Describe the hike, what to expect, etc." />
+                <Textarea id="description" {...formik.getFieldProps('description')} placeholder="Describe the hike..." />
               </div>
             </div>
 
@@ -210,75 +192,71 @@ const handleImageChange = (e) => {
                 <Label>Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !formik.values.date && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      {formik.values.date ? format(formik.values.date, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                    <Calendar mode="single" selected={formik.values.date} onSelect={value => formik.setFieldValue('date', value)} onDayBlur={() => formik.setFieldTouched('date', true)} initialFocus />
                   </PopoverContent>
                 </Popover>
+                {formik.touched.date && formik.errors.date && <FormError>{formik.errors.date}</FormError>}
               </div>
+
               <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="maxSize">Max Group Size</Label>
-                    <Input id="maxSize" name="maxSize" type="number" value={formData.maxSize} onChange={handleInputChange} min={2} required />
-                  </div>
-                  <div>
-                    <Label htmlFor="difficulty">Difficulty</Label>
-                    <Select name="difficulty" value={formData.difficulty} onValueChange={(value) => handleSelectChange('difficulty', value)}>
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="easy">Easy</SelectItem>
-                            <SelectItem value="moderate">Moderate</SelectItem>
-                            <SelectItem value="difficult">Difficult</SelectItem>
-                        </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label htmlFor="maxSize">Max Group Size</Label>
+                  <Input id="maxSize" type="number" {...formik.getFieldProps('maxSize')} />
+                  {formik.touched.maxSize && formik.errors.maxSize && <FormError>{formik.errors.maxSize}</FormError>}
+                </div>
+                <div>
+                  <Label htmlFor="difficulty">Difficulty</Label>
+                  <Select name="difficulty" value={formik.values.difficulty} onValueChange={value => formik.setFieldValue('difficulty', value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="easy">Easy</SelectItem>
+                      <SelectItem value="moderate">Moderate</SelectItem>
+                      <SelectItem value="difficult">Difficult</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
               <div>
                 <Label htmlFor="meetingPoint">Meeting Point</Label>
-                <Input id="meetingPoint" name="meetingPoint" value={formData.meetingPoint} onChange={handleInputChange} placeholder="e.g., Jawalakhel Bus Stop" required/>
+                <Input id="meetingPoint" {...formik.getFieldProps('meetingPoint')} placeholder="e.g., Jawalakhel Bus Stop" />
+                {formik.touched.meetingPoint && formik.errors.meetingPoint && <FormError>{formik.errors.meetingPoint}</FormError>}
               </div>
             </div>
           </div>
           
-          {/* Full-width sections */}
+          {/* Image Upload Section */}
           <div>
             <Label>Cover Images (Up to 5)</Label>
-            {/* ✨ FIX 8: Add `multiple` attribute to the file input */}
-            <Input id="image" type="file" accept="image/*" onChange={handleImageChange} className="mt-2" multiple />
-            
-            {/* ✨ FIX 9: Correctly map over previews to display all selected images */}
+            <Input id="photos" type="file" accept="image/*" onChange={handleImageChange} className="mt-2" multiple />
+            {formik.touched.photos && formik.errors.photos && <FormError>{formik.errors.photos}</FormError>}
             <div className="mt-4 flex flex-wrap gap-4">
-              {imagePreview.map((preview, index) => (
+              {imagePreviews.map((preview, index) => (
                 <div key={index} className="relative w-32 h-20">
                   <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover rounded-md" />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                    onClick={() => handleRemoveImage(index)}
-                  >
+                  <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => handleRemoveImage(index)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
             </div>
           </div>
-
+          
+          {/* Requirements Section */}
           <div>
             <Label>Requirements (Optional)</Label>
             <div className="flex gap-2">
-              <Input value={newRequirement} onChange={(e) => setNewRequirement(e.target.value)} placeholder="e.g., Hiking Boots, Water Bottle" />
+              <Input value={newRequirement} onChange={(e) => setNewRequirement(e.target.value)} placeholder="e.g., Hiking Boots..." />
               <Button type="button" onClick={addRequirement}>Add</Button>
             </div>
             <div className="flex flex-wrap gap-2 mt-3">
-              {requirements.map((req) => (
+              {formik.values.requirements.map((req) => (
                 <span key={req} className="bg-secondary text-secondary-foreground px-3 py-1 text-sm rounded-full flex items-center">
                   {req}
                   <X className="ml-2 cursor-pointer w-4 h-4 hover:text-destructive" onClick={() => removeRequirement(req)} />
@@ -287,9 +265,8 @@ const handleImageChange = (e) => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button type="button" variant="outline" className="w-full" onClick={() => navigate(-1)}>Cancel</Button>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+          <div className="flex justify-end pt-4">
+            <Button type="submit" className="w-full sm:w-auto" disabled={isLoading}>
               {isLoading ? "Creating Group..." : "Create Group"}
             </Button>
           </div>

@@ -1,4 +1,4 @@
-import { data } from "react-router-dom";
+
 import {
   getAllGroupApi,
   getOneGroupApi,
@@ -12,9 +12,11 @@ import {
   pendingJoinRequestApi,
 } from "../api/admin/groupApi";
 
-export const getAllGroupService = async () => {
+
+
+export const getAllGroupService = async (params) => {
   try {
-    const response = await getAllGroupApi();
+    const response = await getAllGroupApi(params);
     return response.data;
    
   } catch (err) {
@@ -42,7 +44,7 @@ export const getOneGroupService = async (id) => {
 
 export const updateOneGroupService = async (id, data) => {
   try {
-    const response = await updateOneGroupApi(id, group);
+    const response = await updateOneGroupApi(id, data);
     return response.data;
   } catch (err) {
     throw err.response?.data || { message: "failed to update data" };

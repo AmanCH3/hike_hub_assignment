@@ -1,14 +1,14 @@
 import axios from "../api" ;
 
-export const getAllGroupApi = () => axios.get("/group/")
+export const getAllGroupApi = (params) => axios.get("/group/", {params})
 
 export const createOneGroupApi = (groupData) => 
     axios.post("/group/create/" , groupData , {
         headers : {
             'Content-Type' : 'multipart/form-data' ,
         }
-    } ,)
-
+    }) ;
+ 
 
 export const getOneGroupApi = (id) => axios.get("/group/" + id)
 
