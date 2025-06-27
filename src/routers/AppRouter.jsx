@@ -21,6 +21,7 @@ import HikeHub404 from "../pages/HikeHub404";
 import PaymentsPage from "../pages/PaymentPage";
 import EsewaSuccessPage from "../pages/EsewaSuccessPage";
 import ChecklistPage from "../pages/ChecklistPage";
+import ProfilePage from "../pages/ProfilePage";
 
 // It's good practice to create a simple component for the failure page too
 const EsewaFailurePage = () => (
@@ -49,6 +50,13 @@ export default function AppRouter() {
           <Route path="login" element={<LoginPage />} />
           <Route path="groups" element={<GroupsPage />} />
           <Route path="payments" element={<PaymentsPage />} />
+
+
+          <Route path="profile" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
           
           {/* --- FIX IS HERE --- */}
           {/* Moved the checklist route to be with other main user features */}
