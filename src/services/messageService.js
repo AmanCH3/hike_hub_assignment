@@ -1,99 +1,54 @@
-// src/services/messageService.js
 
-import io from 'socket.io-client';
+import { socket } from '../../socket';
+import { getMessagesForGroup } from '../api/chatApplicationApi';
 
-const API_BASE_URL = "http://localhost:5050";
-const SOCKET_SERVER_URL = "http://localhost:5050";
-
-let socket;
-
-/**
- * Manages the Socket.IO connection as a singleton.
- */
-export const socketManager = {
-  connect: (authToken) => {
-    // Avoid creating multiple connections
-    if (socket && socket.connected) {
-      return;
-    }
-    
-    // Establish a new connection with authentication
-    socket = io(SOCKET_SERVER_URL, {
-      auth: {
-        token: `Bearer ${authToken}`,
-      },
-    });
-
-    socket.on('connect', () => {
-      console.log('Socket connected:', socket.id);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
-  },
-
-  disconnect: () => {
-    if (socket) {
-      socket.disconnect();
-    }
-  },
-
-  joinGroup: (groupId) => {
-    if (socket) {
-      socket.emit('joinGroup', groupId);
-    }
-  },
-
-  leaveGroup: (groupId) => {
-    if (socket) {
-      socket.emit('leaveGroup', groupId);
-    }
-  },
-
-  sendMessage: (messageData) => {
-    if (socket) {
-      socket.emit('sendMessage', messageData);
-    }
-  },
-
-  onNewMessage: (callback) => {
-    if (socket) {
-      // The server emits 'newMessage', so we listen for that
-      socket.on('newMessage', callback);
-    }
-  },
-
-  offNewMessage: (callback) => {
-    if (socket) {
-      socket.off('newMessage', callback);
-    }
+const connect = () => {
+  if (!socket.connected) {
+    socket.connect();
   }
 };
 
-/**
- * Fetches the historical messages for a specific group.
- * @param {string} groupId - The ID of the group.
- * @param {string} authToken - The user's JWT for authorization.
- * @returns {Promise<Array>} - A promise that resolves to the array of messages.
- */
-export const fetchMessagesForGroup = async (groupId, authToken) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/messages/${groupId}`, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch messages');
-    }
-
-    const result = await response.json();
-    return result.data;
-  } catch (error) {
-    console.error("API Error in fetchMessagesForGroup:", error);
-    // Re-throw the error to be caught by the hook
-    throw error;
+const disconnect = () => {
+  if (socket.connected) {
+    socket.disconnect();
   }
+};
+
+// ** THE FIX IS HERE **
+const getMessages = async (groupId) => {
+
+  return getMessagesForGroup(groupId);
+};
+
+const joinGroup = (groupId) => {
+  socket.emit('joinGroup', groupId);
+};
+
+const leaveGroup = (groupId) => {
+  socket.emit('leaveGroup', groupId);
+};
+
+const sendMessage = (messageData) => {
+  socket.emit('sendMessage', messageData);
+};
+
+const onNewMessage = (callback) => {
+  socket.on('newMessage', callback);
+  return () => socket.off('newMessage', callback);
+};
+
+const onMessageError = (callback) => {
+  socket.on('messageError', callback);
+  return () => socket.off('messageError', callback);
+};
+
+export const chatService = {
+  connect,
+  disconnect,
+  getMessages, // Use the corrected function
+  joinGroup,
+  leaveGroup,
+  sendMessage,
+  onNewMessage,
+  onMessageError,
 };
