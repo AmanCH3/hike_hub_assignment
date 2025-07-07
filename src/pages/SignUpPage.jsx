@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import background from '/public/assets/login_page_web.png';
+import background from '/public/login_page_web.png';
 import RegisterForm from '../components/auth/RegisterForm';
 
 export default function SignUpPage() {
