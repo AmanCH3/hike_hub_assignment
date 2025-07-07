@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Link2 } from "lucide-react";
 // import hike from "../../assets/hike_video.mp4"
-import hikeVideo from "/public/TrailVideo.mp4"
+import hikeVideo from "/TrailVideo.mp4"
 
 
 const HeroSection = () => {
