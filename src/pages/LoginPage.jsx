@@ -1,5 +1,5 @@
 import { useContext, useState , useEf, useEffect } from 'react';
-import background from '../assets/login_page_web.png';
+import background from '/public/assets/login_page_web.png';
 import LoginForm from '../components/auth/LoginForm';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/authProvider';
