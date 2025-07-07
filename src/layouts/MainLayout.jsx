@@ -20,6 +20,7 @@ import Navbar from './Header';
 import { Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify'; // 1. Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css';  // 2. Import the default CSS
+import Chatbot from '../components/chatbot';
 
 export default function MainLayout() {
   return (
@@ -42,6 +43,8 @@ export default function MainLayout() {
         pauseOnHover
         theme="colored"        // Use colored notifications (info, success, error)
       />
+
+      <Chatbot/>
     </>
   );
 }

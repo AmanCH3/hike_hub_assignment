@@ -14,7 +14,7 @@ import {
   FaTachometerAlt,
   FaChevronDown,
 } from "react-icons/fa";
-import logo from "../assets/Trail_Mate_Logo.png";
+import logo from "/public/assets/Trail_Mate_Logo.png";
 import { useAuth } from "../auth/authProvider";
 
 const navItems = [

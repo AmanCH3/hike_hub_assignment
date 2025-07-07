@@ -74,11 +74,6 @@ const navigationData = {
           url: "/admin/payments",
           icon: CreditCard,
         },
-        {
-          title: "Analytics",
-          url: "/admin/analytics",
-          icon: BarChart3,
-        },
       ],
     },
   ],
@@ -125,7 +120,7 @@ export function AppSidebar() {
         </SidebarHeader>
 
         <SidebarContent className="px-2 py-4">
-          <div className="space-y-6">
+          <div className="space-y-1">
             {navigationData.navMain.map((group) => (
               <SidebarGroup key={group.title}>
                 <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">

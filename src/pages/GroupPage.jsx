@@ -8,17 +8,26 @@ import { CreateGroupForm } from "../components/user_group_management/create_grou
 import { useAuth } from "../auth/authProvider";
 import { DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { DialogHeader } from "../components/ui/dialog";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 
 
 export default function GroupsPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { group: allGroups, isLoading } = useGroup();
 
+  // Move all useState hooks to the top, before any conditional returns
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Early return AFTER all hooks are declared
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  // Pagination calculations
   const groupsPerPage = 6;
   const totalPages = Math.ceil(allGroups.length / groupsPerPage);
 
@@ -60,13 +69,20 @@ export default function GroupsPage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-3xl p-6">
-            <CreateGroupForm user={user} onSuccess={() => setCreateGroupOpen(false)} />
+            <DialogHeader>
+              <DialogTitle>Create a New Hiking Group</DialogTitle>
+              <DialogDescription>
+                Fill out the details below to start a new adventure.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="pt-4">
+              <CreateGroupForm user={user} onSuccess={() => setCreateGroupOpen(false)} />
+            </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {isLoading && <p className="text-center">Loading groups...</p>}
-      {!isLoading && allGroups.length === 0 && (
+      {allGroups.length === 0 && (
         <p className="text-center">No groups found.</p>
       )}
 
@@ -76,7 +92,7 @@ export default function GroupsPage() {
         ))}
       </div>
 
-      {!isLoading && allGroups.length > 0 && (
+      {allGroups.length > 0 && (
         <div className="flex justify-center items-center gap-4 pt-8">
           <button
             onClick={handlePrev}

@@ -1,34 +1,40 @@
-// src/components/chat/GroupChat.jsx
+
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useMessages } from '../../hooks/useMessage'
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Loader2 } from 'lucide-react'; // Added Loader2 for loading state
+import { Send, Loader2 } from 'lucide-react';
+import { useChatApplication } from '../../hooks/useChatAppliction';
 
-export function GroupChat({ groupId, currentUser, authToken }) {
-  // All complex logic is now in the custom hook
-  const { messages, isLoading, error, sendMessage } = useMessages(groupId, authToken);
-  
-  // State for the controlled input component remains here
+export function GroupChat({ groupId, currentUser }) { 
+  const { messages, status, sendMessage, isSending } = useChatApplication(groupId);
+
+  const isLoading = status === 'pending';
+  const error = status === 'error' ? "Failed to load chat. Please try again." : null;
+
   const [newMessageText, setNewMessageText] = useState('');
   const messagesEndRef = useRef(null);
 
-  // Effect to automatically scroll to the newest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    // Call the function provided by the hook
-    sendMessage(newMessageText, currentUser._id);
-    setNewMessageText(''); // Clear the input field
+    if (!newMessageText.trim() || isSending) return;
+
+    // 4. Adapt the function call to match what the hook's mutation expects
+    sendMessage({
+      groupId: groupId,
+      senderId: currentUser._id,
+      text: newMessageText,
+    });
+    
+    setNewMessageText('');
   };
 
-  // Render a loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[500px]">
@@ -38,7 +44,6 @@ export function GroupChat({ groupId, currentUser, authToken }) {
     );
   }
 
-  // Render an error state
   if (error) {
     return (
       <div className="flex items-center justify-center h-[500px] text-red-500">
@@ -49,7 +54,6 @@ export function GroupChat({ groupId, currentUser, authToken }) {
 
   return (
     <div className="flex flex-col h-[500px] bg-white rounded-lg p-4 border">
-      {/* Messages Display Area */}
       <div className="flex-grow overflow-y-auto mb-4 pr-2 space-y-4">
         {messages.map((msg) => (
           <div 
@@ -79,16 +83,28 @@ export function GroupChat({ groupId, currentUser, authToken }) {
         <div ref={messagesEndRef} />
       </div>
       
-      {/* Message Input Form */}
       <form onSubmit={handleSendMessage} className="flex gap-2 border-t pt-4">
         <Input
           value={newMessageText}
           onChange={(e) => setNewMessageText(e.target.value)}
           placeholder="Type your message..."
           autoComplete="off"
+          // 5. Disable input while a message is being sent
+          disabled={isSending}
         />
-        <Button type="submit" size="icon" className="bg-green-600 hover:bg-green-700">
-          <Send className="h-5 w-5"/>
+        <Button 
+          type="submit" 
+          size="icon" 
+          className="bg-green-600 hover:bg-green-700"
+          // Disable button while sending
+          disabled={isSending}
+        >
+          {/* 6. Show a spinner on the button when sending */}
+          {isSending ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Send className="h-5 w-5"/>
+          )}
         </Button>
       </form>
     </div>
