@@ -1,5 +1,4 @@
 import { useContext, useState , useEf, useEffect } from 'react';
-import background from '/login_page_web.png';
 import LoginForm from '../components/auth/LoginForm';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/authProvider';
@@ -26,7 +25,7 @@ export default function LoginPage() {
     <div className=" flex items-center justify-evenly ">
       {/* Background Image */}
       <img 
-        src={background} 
+        src={'/login_page_web.png'} 
         alt="Background" 
         className="absolute inset-0 w-full h-full object-cover"
       />

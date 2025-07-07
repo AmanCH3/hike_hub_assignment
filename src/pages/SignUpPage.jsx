@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import background from '/login_page_web.png';
 import RegisterForm from '../components/auth/RegisterForm';
 
 export default function SignUpPage() {
@@ -18,7 +17,7 @@ export default function SignUpPage() {
     <div className="relative min-h-screen flex items-center justify-center">
       {/* Background Image */}
       <img 
-        src={background} 
+        src={'/login_page_web.png'} 
         alt="Background" 
         className="absolute inset-0 w-full h-full object-cover z-0"
       />

@@ -14,7 +14,6 @@ import {
   FaTachometerAlt,
   FaChevronDown,
 } from "react-icons/fa";
-import logo from "/Trail_Mate_Logo.png";
 import { useAuth } from "../auth/authProvider";
 
 const navItems = [
@@ -94,7 +93,7 @@ export default function Navbar() {
           <div className="relative">
             <img 
               className="h-10 w-10 rounded-lg transition-transform group-hover:scale-105" 
-              src={logo} 
+              src={'/Trail_Mate_Logo.png'} 
               alt="Hike Hub" 
             />
           </div>
