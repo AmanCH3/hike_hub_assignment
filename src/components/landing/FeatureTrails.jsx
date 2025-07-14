@@ -95,9 +95,7 @@ const FeaturedTrails = () => {
                     src={trail.images?.[0]} 
                     alt={trail.name} 
                     className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/400x250?text=Trail+Image";
-                    }}
+                  
                   />
                 </div>
                 

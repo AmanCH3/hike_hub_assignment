@@ -20,6 +20,9 @@ export default function LoginPage() {
     }
   }, [user, navigate]);
 
+  const handleLogin = () => {
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
+  };
 
   return (
     <div className=" flex items-center justify-evenly ">
@@ -49,7 +52,7 @@ export default function LoginPage() {
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
           
-          <button
+          <button onClick={handleLogin}
             type="button"
             className="w-full flex items-center justify-center gap-2 rounded-lg py-3 text-gray-700 hover:bg-gray-50"
           >
