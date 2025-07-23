@@ -1,15 +1,15 @@
-    import { getAllTrailApi , getOneApiTrailApi , createOneTrailApi , deleteOneTrailApi , updateOneTrailApi } from "../../api/admin/trailApi";
+    import { th } from "date-fns/locale/th";
+import { getAllTrailApi , getOneApiTrailApi , createOneTrailApi , deleteOneTrailApi , updateOneTrailApi, joinTrailApi, leaveTrailApi } from "../../api/admin/trailApi";
 
-    export const getAllTrailService = async () => {
-        try  {
-            const response = await getAllTrailApi() 
-            return response.data
-        }
-        catch(err){
-            throw err.response?.data || {messasge : "Failed to fetch Trail"}
-        }
-
+    export const getAllTrailService = async (params) => {
+    try  {
+        const response = await getAllTrailApi(params); 
+        return response.data;
     }
+    catch(err){
+        throw err.response?.data || {messasge : "Failed to fetch Trail"};
+    }
+};
 
     export const createOneTrailService = async (data) => {
         try {
@@ -53,5 +53,25 @@
         }
         catch(err){
             throw err.response?.data || {message : "failed to delete"}
+        }
+    }
+
+    export const joinTrailService = async(id) => {
+        try{
+            const response = await joinTrailApi(id)
+            return response.data
+        }
+        catch (err){
+            throw err.response?.data || {message : "Failed to join"}
+        }
+    }
+
+    export const leaveTrailService = async(id) => {
+        try {
+            const response = await leaveTrailApi(id) 
+            return response.data
+        }
+        catch(err){
+            throw err.response?.data || {message : "Failed to leave Trail"}
         }
     }
