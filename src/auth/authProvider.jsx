@@ -62,8 +62,7 @@ export const AuthContextProvider = ({ children }) => {
             }
         }
     };
-
-
+    // --- END OF NEW FUNCTION ---
 
     // This effect runs once when the app loads to restore the session from localStorage
     useEffect(() => {

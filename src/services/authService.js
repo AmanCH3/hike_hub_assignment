@@ -1,5 +1,5 @@
 import React from "react";
-import { registerUserApi, loginUserApi } from "../api/authApi";
+import { registerUserApi, loginUserApi, getGoogleOAuthUrl } from "../api/authApi";
 
 export const registerUserService = async (formData) => {
   try {
@@ -17,4 +17,8 @@ export const loginUserService = async (formData) => {
   } catch (err) {
     throw err.response?.data || { message: "Login Failed" };
   }
+};
+
+export const initiateGoogleLogin = () => {
+  window.location.href = getGoogleOAuthUrl();
 };
