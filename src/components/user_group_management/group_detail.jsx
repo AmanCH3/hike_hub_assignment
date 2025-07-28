@@ -48,22 +48,18 @@ const getDifficultyBadgeColor = (difficulty) => {
     }
 }
 
-// NOTE: The component now receives `group` and `user` as props
 export function GroupDetails({ group, user }) {
 
 
    const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
-  // If no group data is passed, don't render anything.
   if (!group) {
     return <div className="text-center text-gray-500 mt-10">Group data is not available.</div>;
   }
   
-  // All mutation hooks remain for functionality inside the modal
   const requestJoinMutation = useRequestToJoinGroup(); 
   const approveMutation = useApproveJoinRequest(); 
   const denyMutation = useDenyJoinRequest(); 
   
-  // Destructure with default values for safety
   const {
     _id : groupId,
     title,
@@ -81,9 +77,6 @@ export function GroupDetails({ group, user }) {
     trail, // trail will be populated Trail object
   } = group;
 
-  // Assuming 'time' and 'location' are part of the 'group' object or derived from 'meetingPoint' / 'trail'
-  // If 'time' is not explicitly on group, you might need to derive it from 'date' or add it to the model.
-  // For 'location', use trail?.location or meetingPoint?.description as appropriate.
   const displayTime = new Date(date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   const displayLocation = trail?.location || meetingPoint?.description || 'Not specified';
   const displayDate = new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });

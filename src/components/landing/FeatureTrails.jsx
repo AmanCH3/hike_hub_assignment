@@ -1,5 +1,5 @@
-import { Mountain, MapPin, Clock, Sun, Cloud, CloudFog, Users2, Star, Zap, Users, Eye } from "lucide-react";
-import { useAdminTrail } from "../../hooks/admin/useAdminTrail"; 
+import { Mountain, MapPin, Clock, Sun, Cloud, CloudFog, Users2, Star, Zap, Users, Eye, UserPlus } from "lucide-react";
+import { useAdminTrail, useJoinTrail } from "../../hooks/admin/useAdminTrail"; 
 import { Link } from "react-router-dom";
 import { ViewTrailDialog } from "../admin/trail_management/ViewTrailDailog";
 import { useState } from "react";
@@ -8,10 +8,15 @@ import { useState } from "react";
 const FeaturedTrails = () => {
   const [selectedTrail, setSelectedTrail] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+   const { mutate: joinTrail, isLoading: isJoining } = useJoinTrail();
 
   const handleViewTrail = (trail) => {
     setSelectedTrail(trail);
     setDialogOpen(true);
+  };
+
+  const handleJoinRequest = (trailId) => {
+    joinTrail(trailId);
   };
 
   const handleCloseDialog = () => {
@@ -92,12 +97,10 @@ const FeaturedTrails = () => {
               <div className="relative overflow-hidden">
                 <div className="relative h-64 w-full bg-gray-200">
                   <img 
-                    src={trail.images?.[0]} 
+                    src={trail.images} 
                     alt={trail.name} 
                     className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/400x250?text=Trail+Image";
-                    }}
+                  
                   />
                 </div>
                 
@@ -193,13 +196,15 @@ const FeaturedTrails = () => {
                     Quick View
                   </button>
                   
-                  {/* Full Details Link - Goes to dedicated page */}
-                  <Link 
-                    to={`/trail/${trail._id}`}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm font-medium text-center transition-colors flex items-center justify-center gap-2"
+                 
+                   <button 
+                    onClick={() => handleJoinRequest(trail._id)}
+                    disabled={isJoining}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-sm font-medium text-center transition-colors flex items-center justify-center gap-2 disabled:bg-green-400 disabled:cursor-not-allowed"
                   >
-                    Full Details
-                  </Link>
+                    <UserPlus className="h-4 w-4" />
+                    {isJoining ? 'Requesting...' : 'Request to Join'}
+                  </button>
                 </div>
               </div>
             </div>

@@ -22,6 +22,7 @@ import PaymentsPage from "../pages/PaymentPage";
 import EsewaSuccessPage from "../pages/EsewaSuccessPage";
 import ChecklistPage from "../pages/ChecklistPage";
 import ProfilePage from "../pages/ProfilePage";
+import GoogleAuthCallback from "../pages/GoogleAuthCallBack";
 
 // It's good practice to create a simple component for the failure page too
 const EsewaFailurePage = () => (
@@ -48,6 +49,7 @@ export default function AppRouter() {
           <Route path="forgotpassword" element={<ForgotPasswordPage />} />
           <Route path="signup" element={<SignUpPage />} />
           <Route path="login" element={<LoginPage />} />
+           <Route path="/auth/google/success" element={<GoogleAuthCallback />} />
           <Route path="groups" element={<GroupsPage />} />
           <Route path="payments" element={<PaymentsPage />} />
 

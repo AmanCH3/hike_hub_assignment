@@ -107,18 +107,18 @@ export function DashboardHome() {
  const handleDenyRequest = (requestId, groupId) => {
     denyMutation.mutate({ requestId, groupId });
   };
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty.toLowerCase()) {
-      case 'easy':
-        return 'text-green-600 bg-green-50';
-      case 'moderate':
-        return 'text-yellow-600 bg-yellow-50';
-      case 'hard':
-        return 'text-red-600 bg-red-50';
-      default:
-        return 'text-gray-600 bg-gray-50';
-    }
-  };
+  // const getDifficultyColor = (difficulty) => {
+  //   switch (difficulty.toLowerCase()) {
+  //     case 'easy':
+  //       return 'text-green-600 bg-green-50';
+  //     case 'moderate':
+  //       return 'text-yellow-600 bg-yellow-50';
+  //     case 'hard':
+  //       return 'text-red-600 bg-red-50';
+  //     default:
+  //       return 'text-gray-600 bg-gray-50';
+  //   }
+  // };
 
   return (
     <div className="space-y-6">
@@ -393,7 +393,7 @@ export function DashboardHome() {
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span>{new Date(request.group?.date).toLocaleDateString()}</span>
                           <span>•</span>
-                          <span className={`px-2 py-1 rounded-full font-medium ${getDifficultyColor(request.group?.trail?.difficult)}`}>
+                          <span className={`px-2 py-1 rounded-full font-medium ${(request.group?.trail?.difficult)}`}>
                             {request.group?.trail?.difficult}
                           </span>
                         </div>
