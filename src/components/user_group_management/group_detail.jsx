@@ -1,3 +1,192 @@
+// "use client"
+
+// import React, { useState } from "react";
+// // REMOVED: useNavigate hook is no longer needed here.
+// import { Button } from "@/components/ui/button";
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Badge } from "@/components/ui/badge";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { CalendarDays, MapPin, Share2, Check, X } from "lucide-react";
+// import { useApproveJoinRequest, useDenyJoinRequest, useRequestToJoinGroup } from "../../hooks/useGroup";
+// import { JoinGroupDialog } from "./join_group_dailog";
+// import { GroupChat } from "./group_chat";
+
+// const getDifficultyBadgeColor = (difficulty) => {
+//     switch (difficulty) {
+//         case 'Easy': return 'bg-green-100 text-green-800 hover:bg-green-100';
+//         case 'Moderate': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
+//         case 'Difficult': return 'bg-red-100 text-red-800 hover:bg-red-100';
+//         default: return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+//     }
+// }
+
+// export function GroupDetails({ group, user, onClose }) {
+//   const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
+
+//   if (!group) {
+//     return null;
+//   }
+
+//   const requestJoinMutation = useRequestToJoinGroup();
+//   const approveMutation = useApproveJoinRequest();
+//   const denyMutation = useDenyJoinRequest();
+
+//   const {
+//     _id: groupId,
+//     title,
+//     description,
+//     date,
+//     maxSize,
+//     leader,
+//     participants = [],
+//     trail,
+//   } = group;
+
+//   const displayTime = new Date(date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+//   const displayLocation = trail?.location || 'Not specified';
+//   const displayDate = new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+//   
+//   const confirmedParticipants = participants.filter(p => p.status === 'confirmed');
+//   const currentSize = confirmedParticipants.length;
+//   const isGroupFull = currentSize >= maxSize;
+//   
+//   const isCurrentUserLeader = leader?._id === user?._id;
+//   const currentUserParticipantEntry = participants.find(p => p.user?._id === user?._id);
+//   const isCurrentUserConfirmedParticipant = currentUserParticipantEntry?.status === 'confirmed';
+//   const hasPendingRequest = currentUserParticipantEntry?.status === 'pending';
+//   
+//   const pendingJoinRequests = participants.filter(p => p.status === 'pending');
+
+//   const handleSendJoinRequest = ({ message }) => {
+//     requestJoinMutation.mutate({ groupId, data: { message } });
+//   };
+//   const handleApprove = (requestId) => approveMutation.mutate({ groupId, requestId });
+//   const handleDeny = (requestId) => denyMutation.mutate({ groupId, requestId });
+
+//   const canViewChat = isCurrentUserLeader || isCurrentUserConfirmedParticipant;
+  
+//   // --- CORRECTED HANDLECLOSE FUNCTION ---
+//   // It now ONLY calls the onClose prop. No more navigation logic.
+//   const handleClose = () => {
+//     if (onClose) {
+//         onClose();
+//     }
+//   };
+
+//   return (
+//     <>
+//       <JoinGroupDialog
+//         open={isJoinDialogOpen}
+//         setOpen={setJoinDialogOpen}
+//         groupTitle={group.title}
+//         onJoin={handleSendJoinRequest}
+//       />
+//     
+//         <div className="p-4 border-b flex justify-between items-center bg-white sticky top-0 z-10">
+//             <h2 className="text-lg font-semibold">{title}</h2>
+//             <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={handleClose}>
+//                 <X className="h-5 w-5" />
+//             </Button>
+//         </div>
+
+//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 flex-grow overflow-hidden">
+//             <div className="lg:col-span-2 p-6 space-y-6 overflow-y-auto">
+//               <section>
+//                 <div className="flex justify-between items-start mb-4">
+//                     <div>
+//                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{title}</h1>
+//                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-500 mt-2">
+//                             <div className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4" /><span>{displayDate} at {displayTime}</span></div>
+//                             <div className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /><span>{displayLocation}</span></div>
+//                         </div>
+//                     </div>
+//                     <Button variant="outline" size="sm" className="hidden sm:inline-flex"><Share2 className="h-4 w-4 mr-2" />Share</Button>
+//                 </div>
+//                 <p className="text-gray-600 mb-6">{description}</p>
+//                 {!isCurrentUserConfirmedParticipant && !isCurrentUserLeader && (
+//                     <Button onClick={() => setJoinDialogOpen(true)} disabled={isGroupFull || hasPendingRequest || requestJoinMutation.isPending} size="lg" className="w-full bg-green-600 hover:bg-green-700 text-lg">
+//                     {hasPendingRequest ? "Request Pending" : isGroupFull ? "Group Full" : "Request to Join"}
+//                     </Button>
+//                 )}
+//                 {isCurrentUserConfirmedParticipant && !isCurrentUserLeader && (
+//                     <Badge className="w-full justify-center py-2 text-lg bg-blue-100 text-blue-800">You are a participant!</Badge>
+//                 )}
+//                 {isCurrentUserLeader && (
+//                     <Badge className="w-full justify-center py-2 text-lg bg-indigo-100 text-indigo-800">You are the leader!</Badge>
+//                 )}
+//               </section>
+
+//               {canViewChat && (
+//                 <section>
+//                   <h3 className="text-xl font-semibold mb-4">Group Chat</h3>
+//                   <GroupChat groupId={groupId} currentUser={user} />
+//                 </section>
+//               )}
+//             </div>
+
+//             <div className="border-l bg-gray-50 p-6 space-y-6 overflow-y-auto">
+//                 <section>
+//                     <h3 className="text-lg font-semibold mb-4">Group Leader</h3>
+//                     <div className="flex items-center gap-3">
+//                         <Avatar>
+//                             <AvatarImage src={leader?.profileImage} />
+//                             <AvatarFallback>{leader?.name.charAt(0)}</AvatarFallback>
+//                         </Avatar>
+//                         <div>
+//                             <p className="font-semibold">{leader?.name}</p>
+//                             <p className="text-sm text-gray-500">{leader?.hikerType || 'Hiker'}</p>
+//                         </div>
+//                     </div>
+//                 </section>
+
+//                 <section>
+//                     <h3 className="text-lg font-semibold mb-4">Participants ({currentSize}/{maxSize})</h3>
+//                     <div className="space-y-3">
+//                         {confirmedParticipants.map(p => (
+//                             <div key={p._id} className="flex items-center justify-between">
+//                                 <div className="flex items-center gap-3">
+//                                     <Avatar className="h-9 w-9">
+//                                         <AvatarImage src={p.user?.profileImage} />
+//                                         <AvatarFallback>{p.user?.name.charAt(0)}</AvatarFallback>
+//                                     </Avatar>
+//                                     <div>
+//                                         <p className="font-medium text-sm">{p.user?.name}</p>
+//                                     </div>
+//                                 </div>
+//                                 <Badge variant="outline" className="text-green-600 border-green-200">Confirmed</Badge>
+//                             </div>
+//                         ))}
+//                     </div>
+//                 </section>
+
+//                 {isCurrentUserLeader && pendingJoinRequests.length > 0 && (
+//                     <section>
+//                         <h3 className="text-lg font-semibold mb-4">Pending Requests</h3>
+//                         <div className="space-y-3">
+//                             {pendingJoinRequests.map(p => (
+//                                 <Card key={p._id} className="p-3">
+//                                     <div className="flex items-center justify-between">
+//                                         <p className="font-medium text-sm">{p.user?.name}</p>
+//                                         <div className="flex gap-2">
+//                                             <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => handleApprove(p._id)}><Check className="h-4 w-4 text-green-600" /></Button>
+//                                             <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => handleDeny(p._id)}><X className="h-4 w-4 text-red-600" /></Button>
+//                                         </div>
+//                                     </div>
+//                                     {p.message && <p className="text-xs text-gray-500 mt-2 border-l-2 pl-2">"{p.message}"</p>}
+//                                 </Card>
+//                             ))}
+//                         </div>
+//                     </section>
+//                 )}
+//             </div>
+//         </div>
+//     </>
+//   );
+// }
+
+
+
+
 // src/components/admin/group_management/group_detail.jsx
 "use client"
 

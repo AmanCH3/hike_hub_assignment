@@ -1,9 +1,10 @@
-// src/components/admin/trail_management/ViewTrailDialog.jsx
+// src/components/admin/trail_management/ViewTrailDailog.jsx
 "use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Mountain, Zap, Star } from "lucide-react";
 
 // Helper to get difficulty color (can be moved to a utils file)
@@ -20,10 +21,8 @@ const getDifficultyColor = (difficulty) => {
 export function ViewTrailDialog({ open, onOpenChange, trail }) {
   if (!trail) return null;
 
-
-
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const SERVER_ROOT_URL = API_BASE_URL ? API_BASE_URL.replace('/api', '') : 'http://localhost:5050/uploads';
+  const SERVER_ROOT_URL = API_BASE_URL ? API_BASE_URL.replace('/api', '') : 'http://localhost:5050';
 
   const getFullImageUrl = (path) => {
     if (!path) {
@@ -32,12 +31,8 @@ export function ViewTrailDialog({ open, onOpenChange, trail }) {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
-    // Otherwise, it's a relative path, so build the full URL.
-    return `${SERVER_ROOT_URL}/${path}`;
+    return `${SERVER_ROOT_URL}/${path.replace(/\\/g, '/')}`;
   };
-
-  // --- End of Corrected URL Logic ---
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -51,7 +46,6 @@ export function ViewTrailDialog({ open, onOpenChange, trail }) {
         </DialogHeader>
         <div className="space-y-6 py-4">
           
-          {/* Main Image Display now uses the corrected helper */}
           {trail.images && trail.images.length > 0 && (
             <div className="relative h-64 w-full rounded-lg overflow-hidden bg-gray-200">
               <img 
@@ -62,21 +56,6 @@ export function ViewTrailDialog({ open, onOpenChange, trail }) {
             </div>
           )}
           
-          {/* Thumbnail Gallery for all images */}
-          {trail.images && trail.images.length > 1 && (
-             <div>
-                <Label className="text-sm font-semibold">Image Gallery</Label>
-                <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {trail.images.map((imagePath, index) => (
-                        <div key={index} className="relative h-24 w-24 rounded-md overflow-hidden">
-                            <img src={getFullImageUrl(imagePath)} alt={`Trail view ${index + 1}`} className="absolute h-full w-full object-cover" />
-                        </div>
-                    ))}
-                </div>
-            </div>
-          )}
-
-          {/* Key Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-50">
               <Label className="text-xs text-muted-foreground flex items-center gap-1"><Zap className="h-3 w-3" /> Difficulty</Label>
@@ -96,13 +75,11 @@ export function ViewTrailDialog({ open, onOpenChange, trail }) {
             </div>
           </div>
           
-          {/* Description */}
           <div>
             <Label className="text-sm font-semibold">Description</Label>
             <p className="mt-1 text-muted-foreground text-base">{trail.description || 'No description available.'}</p>
           </div>
 
-          {/* Features */}
           {trail.features && trail.features.length > 0 && (
             <div>
               <Label className="text-sm font-semibold">Features</Label>
@@ -114,7 +91,6 @@ export function ViewTrailDialog({ open, onOpenChange, trail }) {
             </div>
           )}
 
-          {/* Seasons */}
           {trail.seasons && trail.seasons.length > 0 && (
             <div>
               <Label className="text-sm font-semibold">Best Seasons</Label>
@@ -126,6 +102,10 @@ export function ViewTrailDialog({ open, onOpenChange, trail }) {
             </div>
           )}
         </div>
+        {/* --- JOIN BUTTON ADDED --- */}
+        <DialogFooter>
+            <Button className="w-full" onClick={() => alert('Join Trail Logic Here!')}>Join Here</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

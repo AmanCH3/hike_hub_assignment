@@ -1,77 +1,83 @@
-    import { th } from "date-fns/locale/th";
-import { getAllTrailApi , getOneApiTrailApi , createOneTrailApi , deleteOneTrailApi , updateOneTrailApi, joinTrailApi, leaveTrailApi } from "../../api/admin/trailApi";
+import { 
+  getAllTrailApi, 
+  getOneApiTrailApi, 
+  createOneTrailApi, 
+  deleteOneTrailApi, 
+  updateOneTrailApi,
+  joinTrailWithDateApi,
+  completeTrailApi,
+  cancelJoinedTrailApi // ✅ 1. IMPORT THE NEW API FUNCTION
+} from "../../api/admin/trailApi";
 
-    export const getAllTrailService = async (params) => {
-    try  {
-        const response = await getAllTrailApi(params); 
-        return response.data;
-    }
-    catch(err){
-        throw err.response?.data || {messasge : "Failed to fetch Trail"};
-    }
+export const getAllTrailService = async (params) => {
+  try {
+    const response = await getAllTrailApi(params); 
+    return response.data;
+  } catch(err) {
+    throw err.response?.data || { message: "Failed to fetch Trail" };
+  }
 };
 
-    export const createOneTrailService = async (data) => {
-        try {
-            const response = await createOneTrailApi(data) 
-            return response.data
-        }
-        catch(err){
-            throw err.response?.data || {message : "failed to create"}
-        }
-    }
+export const createOneTrailService = async (data) => {
+  try {
+    const response = await createOneTrailApi(data);
+    return response.data;
+  } catch(err) {
+    throw err.response?.data || { message: "Failed to create" };
+  }
+};
 
+export const getOneTrailService = async (id) => {
+  try {
+    const response = await getOneApiTrailApi(id);
+    return response.data;
+  } catch(err) {
+    throw err.response?.data || { message: "Failed to load" };
+  }
+};
 
-    export const getOneTrailService = async (id) => {
-        try {
-            const response = await getOneApiTrailApi(id) 
-            return response.data
+export const updateOneTrailService = async (id, data) => {
+  try {
+    const response = await updateOneTrailApi(id, data);
+    return response.data;
+  } catch(err) {
+    throw err.response?.data || { message: "Failed to update" };
+  }
+};
 
-        }
-        catch(err){
-            throw err.response?.data || {message : "Failed to load"}
-        }
-    }
+export const deleteOneTrailService = async (id) => {
+  try {
+    const response = await deleteOneTrailApi(id);
+    return response.data;
+  } catch(err) {
+    throw err.response?.data || { message: "Failed to delete" };
+  }
+};
 
+export const joinTrailWithDateService = async (id, data) => {
+  try {
+    const response = await joinTrailWithDateApi(id, data);
+    return response.data;
+  } catch (err) {
+    throw err.response?.data || { message: "Failed to schedule hike" };
+  }
+};
 
-    export const updateOneTrailService = async (id , data) => {
-        try {
-            const response = await updateOneTrailApi(id , data) 
-            return response.data
+export const completeTrailService = async (joinedTrailId) => {
+  try {
+    const response = await completeTrailApi(joinedTrailId);
+    return response.data;
+  } catch (err) {
+    throw err.response?.data || { message: "Failed to mark trail as complete" };
+  }
+};
 
-        }
-        catch(err){
-            throw err.response?.data || {message : "failed to updated"}
-        }
-    }
-
-    export const deleteOneTrailService = async(id) => {
-        try {
-            const response = await deleteOneTrailApi(id)
-            return response.data 
-
-        }
-        catch(err){
-            throw err.response?.data || {message : "failed to delete"}
-        }
-    }
-
-    export const joinTrailService = async(id) => {
-        try{
-            const response = await joinTrailApi(id)
-            return response.data
-        }
-        catch (err){
-            throw err.response?.data || {message : "Failed to join"}
-        }
-    }
-
-    export const leaveTrailService = async(id) => {
-        try {
-            const response = await leaveTrailApi(id) 
-            return response.data
-        }
-        catch(err){
-            throw err.response?.data || {message : "Failed to leave Trail"}
-        }
-    }
+// ✅ 2. EXPORT THE NEW SERVICE FUNCTION
+export const cancelJoinedTrailService = async (joinedTrailId) => {
+  try {
+    const response = await cancelJoinedTrailApi(joinedTrailId);
+    return response.data;
+  } catch (err) {
+    throw err.response?.data || { message: "Failed to cancel hike" };
+  }
+};

@@ -1,4 +1,3 @@
-// src/pages/GroupsPage.jsx
 import { useState } from "react";
 import { useGroup } from "../hooks/useGroup";
 import { GroupCard } from "../components/user_group_management/group_card";
@@ -8,26 +7,21 @@ import { CreateGroupForm } from "../components/user_group_management/create_grou
 import { useAuth } from "../auth/authProvider";
 import { DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { DialogHeader } from "../components/ui/dialog";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
-
 
 export default function GroupsPage() {
   const { user } = useAuth();
   const { group: allGroups, isLoading } = useGroup();
 
-  // Move all useState hooks to the top, before any conditional returns
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Early return AFTER all hooks are declared
   if (isLoading) {
     return <p>Loading...</p>;
   }
 
-  // Pagination calculations
   const groupsPerPage = 6;
   const totalPages = Math.ceil(allGroups.length / groupsPerPage);
 
@@ -76,7 +70,10 @@ export default function GroupsPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="pt-4">
-              <CreateGroupForm user={user} onSuccess={() => setCreateGroupOpen(false)} />
+              <CreateGroupForm
+                user={user}
+                onSuccess={() => setCreateGroupOpen(false)}
+              />
             </div>
           </DialogContent>
         </Dialog>
@@ -114,14 +111,18 @@ export default function GroupsPage() {
         </div>
       )}
 
-      <Dialog
-        open={!!selectedGroup}
-        onOpenChange={(isOpen) => !isOpen && handleCloseDetails()}
-      >
-        <DialogContent className="max-w-4xl p-0 border-0">
-          <GroupDetails group={selectedGroup} user={user} />
-        </DialogContent>
-      </Dialog>
+      {/* ✅ Only render the Dialog when selectedGroup exists */}
+      {selectedGroup && (
+        <Dialog open={true} onOpenChange={(isOpen) => !isOpen && handleCloseDetails()}>
+          <DialogContent className="max-w-4xl p-0 border-0">
+            <GroupDetails
+              group={selectedGroup}
+              user={user}
+              onClose={handleCloseDetails}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </main>
   );
 }
