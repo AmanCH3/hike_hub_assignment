@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Eye, Edit, Trash2, MapPin, Clock, Mountain, Star, Zap } from "lucide-react";
 
-// Helper to get difficulty color remains the same
+// Helper to get difficulty color
 const getDifficultyColor = (difficulty) => {
   if (!difficulty) return "bg-gray-100 text-gray-800";
   switch (difficulty.toLowerCase()) {
@@ -21,35 +21,34 @@ const getDifficultyColor = (difficulty) => {
 export function TrailCard({ trail, onView, onEdit, onDelete }) {
   if (!trail) return null;
 
+  // --- FIX IS HERE ---
+  // This logic correctly constructs the full image URL from the relative path.
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const SERVER_ROOT_URL = API_BASE_URL ? API_BASE_URL.replace('/api', '') : 'http://localhost:5050';
 
-
   const getFullImageUrl = (path) => {
- 
     if (!path) {
-      return "/placeholder.svg";
+      // Return a default placeholder if no image is available
+      return "https://dk2dv4ezy246u.cloudfront.net/widgets/sMRhRDPDTxK7_large.jpg";
     }
-
-   
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
-
-   
-    return `${SERVER_ROOT_URL}/${path}`;
+    // Prepend the server's root URL to the relative path
+    return `${SERVER_ROOT_URL}/${path.replace(/\\/g, '/')}`;
   };
 
-  
   const imageUrl = getFullImageUrl(trail.images?.[0]);
-
- 
+  // --- END OF FIX ---
 
   return (
-    <Card className="overflow-hidden flex flex-col h-full">
-      <div className="relative h-48 w-full">
-        {/* The img tag now uses the intelligently constructed imageUrl */}
-        <img src={imageUrl} alt={trail.name} className="absolute h-full w-full object-cover" />
+    <Card className="overflow-hidden flex flex-col h-full group transition-shadow hover:shadow-lg">
+      <div className="relative h-48 w-full overflow-hidden">
+        <img 
+          src={imageUrl} 
+          alt={trail.name} 
+          className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
       </div>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
@@ -69,7 +68,7 @@ export function TrailCard({ trail, onView, onEdit, onDelete }) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onView(trail)}><Eye className="mr-2 h-4 w-4" /> View</DropdownMenuItem>
               <DropdownMenuItem onClick={() => onEdit(trail)}><Edit className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDelete(trail._id)} className="text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDelete(trail)} className="text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
